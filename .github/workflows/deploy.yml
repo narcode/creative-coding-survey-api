@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Deploy
+name: Deploy via ssh
 
 # Controls when the workflow will run
 on:
@@ -14,19 +14,18 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  deploy:
+  build:
+    name: Build
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: deploy via ssh
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: appleboy/ssh-action@master
       # Runs a single command using the runners shell
         with: 
           host: ${{ secrets.HOST }}
-          USERNAME: ${{ secrets.USERNAME }}
-          PORT: ${{ secrets.PORT }}
-          KEY: ${{ secrets.SSHKEY }}
-          script: 'cd /var/www/creative-coding-survey-api && git pull'
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSHKEY }}
+          script: cd /var/www/creative-coding-survey-api && git pull
 
