@@ -2,4 +2,6 @@
 
 API server for the CCU mapping survey.
 
-#### testing deployment...
+### Deployment
+
+Let op: Through github actions the repository is being updated after each push to the main branch!
