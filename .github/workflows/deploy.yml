@@ -35,5 +35,5 @@ jobs:
           USERNAME: ${{ secrets.USERNAME }}
           PORT: ${{ secrets.PORT }}
           KEY: ${{ secrets.SSHKEY }}
-          script: 'cd /var/www/deploy-api && git pull'
+          script: 'cd /var/www/creative-coding-survey-api && git pull'
 
