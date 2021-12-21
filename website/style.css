@@ -27,7 +27,7 @@ a {
  }
 
 .item {
-    padding: 10px;
+    padding: 1%;
     order: 0;
     position: relative;
     display: inline-flex; 
