@@ -8,13 +8,23 @@ import '../css/creativecodingsurvey.scss';
 export class CreativeCodingSurvey {
     constructor(element, options) {
         this.starField = [];
+        this.iconSet = [];
+    }
+
+    preload(sketch) {
+        this.iconSet['enthusiasts'] = sketch.loadImage('/img/enthusiasts.svg')
     }
 
     setup(sketch, surveyData) {
         this.sketch = sketch;
         this.surveyData = surveyData;
 
+        // resize icons
+        this.iconSet['enthusiasts'].resize(15,15)
+
         sketch.createCanvas(sketch.windowWidth, sketch.windowHeight)
+
+        // we should plot data from the surveyData
         for(let i = 0; i < 80; i++){
             const randX = sketch.round(sketch.random(0, window.innerWidth));
             const randY = sketch.round(sketch.random(0, window.innerHeight));
@@ -23,8 +33,10 @@ export class CreativeCodingSurvey {
             // new makeStar(randX, randY, randR)
             this.starField.push({
                 draw: () => {
-                    sketch.circle(randX, randY, randR)
-                    sketch.fill(255);
+                    // sketch.circle(randX, randY, randR)
+                    // sketch.fill(255);
+                    //
+                    sketch.image(this.iconSet['enthusiasts'], randX, randY);
                 }}
             );
         }
@@ -33,7 +45,7 @@ export class CreativeCodingSurvey {
     draw(sketch) {
         // console.log(this.surveyData)
 
-        sketch.background(0);
+        sketch.background(255);
 
         this.starField.map((starPoint) => {
             starPoint.draw()
@@ -56,6 +68,7 @@ export default element => {
     });
 
     const thisSketch = ( sketch ) => {
+        sketch.preload = () => projectCanvas.preload(sketch);
         sketch.setup = () => projectCanvas.setup(sketch, surveyData);
         sketch.draw = () => projectCanvas.draw(sketch);
         sketch.windowResized = () => projectCanvas.windowResized(sketch);
