@@ -1,24 +1,24 @@
-import '../css/creativecodingsurvey.scss';
 import { loadJSON } from '../utils/ajax.js';
+import { surveyData } from '../data/surveyData.js';
+
+import '../css/creativecodingsurvey.scss';
+
+let useMockData = true;
 
 export default element => {
     console.log('Component mounted on', element);
-        // this.loadAnswersJSON();
 
     // public component API
     element.loadAnswersJSON = () => {
-        if (!window.mappingJSONData) {
-
-            let endpoint = 'https://mapping-api.creativecodingutrecht.nl/answers';
+        if (!useMockData) {
+            let endpoint = 'https://mapping-api.creativecodingutrecht.nl/creative-coders';
             loadJSON(endpoint, (data) => {
-                    console.log(data)
-                },
-                (error) => {
-                    console.log(`error! ${error}`)
-                }
-            );
+                console.log(data)
+            });
         }
-
+        else {
+            console.log(surveyData)
+        }
     };
     element.loadAnswersJSON()
 
