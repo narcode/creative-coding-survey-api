@@ -131,3 +131,7 @@ dmypy.json
 
 # mocked data files
 *.json
+
+devnotes.md
+*.env
+node_modules
