@@ -7,8 +7,10 @@ function responseFromRow(row) {
   };
 }
 
+const columns = "id, created, modified, branch, responses, submitted";
+
 exports.retrieveAll = (pool, callback) => {
-  pool.query("SELECT id, created, modified, branch, responses, submitted FROM responses where branch='Creative Coders' AND submitted=1", (err, rows) => {
+  pool.query(`SELECT ${columns} FROM responses where branch='Creative Coders' AND submitted=1`, (err, rows) => {
     if (err != null) {
       callback(err, null)
     } else {
@@ -18,7 +20,7 @@ exports.retrieveAll = (pool, callback) => {
 }
 
 exports.retrieve = (pool, id, callback) => {
-  pool.query("SELECT id, created, modified, branch, responses, submitted FROM responses where id = ? AND branch = 'Creative Coders' AND submitted=1", id, (err, rows) => {
+  pool.query(`SELECT ${columns} FROM responses where id = ? AND branch = 'Creative Coders' AND submitted=1`, id, (err, rows) => {
     if (err != null) {
       console.error(err);
       callback(err, null);
