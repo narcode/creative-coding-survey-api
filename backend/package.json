@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "country-list": "^2.2.0",
+    "express": "^4.17.2",
+    "mysql2": "^2.3.3"
+  }
+}
