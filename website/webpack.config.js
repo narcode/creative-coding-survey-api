@@ -7,11 +7,11 @@ module.exports = {
     entry: './src/app.js',
     output: {
         filename: 'bundle.js',
-        path: path.resolve(__dirname, 'public')
+        path: path.resolve(__dirname, 'dist')
     },
     devtool: 'inline-source-map',
     devServer: {
-        contentBase: "./public",
+        contentBase: "./dist",
         hot: true
     },
     module: {
@@ -32,7 +32,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: 'index.html'
+            template: './dist/index.html'
         })
     ],
     watch: true

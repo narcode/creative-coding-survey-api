@@ -1,52 +1,36 @@
-import 'p5'
-import * as P5 from "p5";
-
-class CreativeCodingSurvey {
-
-    constructor(element, options) {
-        this._element = element;
-        this._options = {...CreativeCodingSurvey.options, ...options};
-
-        this.load();
-    }
-
-    static get options() {
-        return {
-            debugMode: false
-        };
-    }
-
-    load() {
-        this._svgNameSpace = 'http://www.w3.org/2000/svg';
-        this._bindEvents();
-    }
-
-    _bindEvents() {
-        window.addEventListener('resize', {});
-        window.addEventListener('load', {});
-    }
-
-
-    setup(sketch) {
-        this.sketch = sketch;
-    }
-
-    draw(sketch) {
-        sketch.translate(0,0);
-    }
-
-    destroy() {
-    }
-}
+import '../css/creativecodingsurvey.scss';
+import { loadJSON } from '../utils/ajax.js';
 
 export default element => {
     console.log('Component mounted on', element);
+        // this.loadAnswersJSON();
 
-    const CreativeCodingSurvey = new CreativeCodingSurvey();
-    const thisSketch = ( sketch ) => {
-        sketch.setup = () => CreativeCodingSurvey.setup(sketch);
-        sketch.draw = () => CreativeCodingSurvey.draw(sketch);
+    // public component API
+    element.loadAnswersJSON = () => {
+        if (!window.mappingJSONData) {
+
+            let endpoint = 'https://mapping-api.creativecodingutrecht.nl/answers';
+            loadJSON(endpoint, (data) => {
+                    console.log(data)
+                },
+                (error) => {
+                    console.log(`error! ${error}`)
+                }
+            );
+        }
+
     };
+    element.loadAnswersJSON()
 
-    let myp5 = new P5(thisSketch);
-}
+    // dispatch events to notify other components
+    element.dispatchEvent(new CustomEvent('bar'));
+
+    // expose destroy method
+    return () => {
+        // restore content
+        element.textContent = '';
+
+        // clean up methods
+        element.foo = undefined;
+    };
+};

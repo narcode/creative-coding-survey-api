@@ -1,5 +1,5 @@
 {
-  "name": "creacoding",
+  "name": "creativecodingsurvey",
   "version": "0.0.1",
   "description": "",
   "main": "app.js",
@@ -10,14 +10,9 @@
     "build": "webpack",
     "webpack": "webpack -d --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@bitbucket.org/immerMeer/codevember-boilerplate.git"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/immerMeer/odevember-boilerplate#readme",
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-loader": "^8.0.6",
@@ -34,7 +29,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.5.0",
-    "conditioner-core": "^2.3.1",
+    "conditioner-core": "^2.3.3",
     "p5": "^0.10.2",
     "yarn": "^1.19.1"
   },
