@@ -46,12 +46,14 @@ export const loadJSON = (url, success, error = null) => {
           success(JSON.parse(xhr.responseText));
         }
         else if (error) {
-
           error(xhr);
         }
       }
     }
-  };
+  }
+  xhr.onerror = () => {
+    error(`there's an error dont you know`)
+  }
 
   xhr.open('GET', url, true);
   xhr.send();
