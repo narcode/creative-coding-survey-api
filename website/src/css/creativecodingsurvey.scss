@@ -17,8 +17,7 @@ canvas {
 }
 
 body {
-  font-family: sans-serif;
-  font-size: 16px;
+  font-family: 'Roboto Mono', monospace;
 }
 
 nav {
@@ -35,15 +34,24 @@ a {
   align-items: flex-start;
   flex-wrap: nowrap;
   background: none;
+
+  li {
+    display: inline-flex;
+
+    width: auto;
+    padding: 0.25rem 1rem;
+
+    position: relative;
+    order: 0;
+
+    &:first-of-type:before,
+    a::before {
+      content: attr(data-value);
+      margin: 0 0.5rem;
+    }
+  }
 }
 
-.item {
-  padding: 1%;
-  order: 0;
-  position: relative;
-  display: inline-flex;
-  width: auto;
-}
 
 a:hover, .item a:hover::after {
   color: #ccc;
