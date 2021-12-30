@@ -12,10 +12,10 @@ function createPool(password) {
     database: 'mapping',
   });
 }
+
 function allowCORS(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Content-Security-Policy', "default-src * 'unsafe-inline'");
 
   next();
 }
