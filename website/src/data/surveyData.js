@@ -1,4 +1,4 @@
-export const surveyData = [
+export const mockData = [
     {
         "error":false,
         "data":[
