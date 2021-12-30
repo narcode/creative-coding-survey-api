@@ -1,5 +1,5 @@
 import { loadJSON } from '../utils/ajax.js';
-import { surveyData } from '../data/surveyData.js';
+import { mockData } from '../data/surveyData.js';
 
 import * as P5 from "p5";
 
@@ -7,48 +7,49 @@ import '../css/creativecodingsurvey.scss';
 
 export class CreativeCodingSurvey {
     constructor(element, options) {
-        this.starField = [];
-        this.iconSet = [];
+        this.canvasEntitites    = [];
+        this.iconSet            = [];
     }
 
     preload(sketch) {
-        this.iconSet['enthusiasts'] = sketch.loadImage('/img/enthusiasts.svg')
+        this.iconSet['enthusiast'] = sketch.loadImage('/img/enthusiasts.svg')
+        this.iconSet['maker'] = sketch.loadImage('/img/enthusiasts.svg')
+        this.iconSet['organisation'] = sketch.loadImage('/img/enthusiasts.svg')
+        this.iconSet['contributor'] = sketch.loadImage('/img/enthusiasts.svg')
+        this.iconSet['venue'] = sketch.loadImage('/img/enthusiasts.svg')
+        this.iconSet['event'] = sketch.loadImage('/img/enthusiasts.svg')
+        this.iconSet['anonymous'] = sketch.loadImage('/img/enthusiasts.svg')
     }
 
     setup(sketch, surveyData) {
-        this.sketch = sketch;
-        this.surveyData = surveyData;
+        this.sketch             = sketch;
+        this.surveyData         = surveyData;
 
         // resize icons
-        this.iconSet['enthusiasts'].resize(15,15)
+        this.iconSet['enthusiast'].resize(15,15)
 
         sketch.createCanvas(sketch.windowWidth, sketch.windowHeight)
 
-        // we should plot data from the surveyData
-        for(let i = 0; i < 80; i++){
+        this.surveyData.map((responseEntity) => {
             const randX = sketch.round(sketch.random(0, window.innerWidth));
             const randY = sketch.round(sketch.random(0, window.innerHeight));
-            const randR = sketch.random(2, 4);
 
             // new makeStar(randX, randY, randR)
-            this.starField.push({
+            this.canvasEntitites.push({
+                entity: responseEntity,
                 draw: () => {
-                    // sketch.circle(randX, randY, randR)
-                    // sketch.fill(255);
-                    //
-                    sketch.image(this.iconSet['enthusiasts'], randX, randY);
+                    sketch.image(this.iconSet['enthusiast'], randX, randY);
                 }}
             );
-        }
+        });
+        console.log(this.canvasEntitites);
     }
 
     draw(sketch) {
-        // console.log(this.surveyData)
-
         sketch.background(255);
 
-        this.starField.map((starPoint) => {
-            starPoint.draw()
+        this.canvasEntitites.map((canvasEntity) => {
+            canvasEntity.draw()
         });
     }
 
@@ -61,15 +62,21 @@ const projectCanvas = new CreativeCodingSurvey();
 export default element => {
     console.log('Component mounted on', element);
 
-    loadJSON('https://mapping-api.creativecodingutrecht.nl/creative-coders', (data) => {
-        console.log('fresh live data', data)
+    let apiURI = 'https://mapping-api.creativecodingutrecht.nl';
+    let apiEndpoint = 'responses';
+    let responseData;
+
+    loadJSON(`${apiURI}/${apiEndpoint}`, (data) => {
+        console.log('fresh live data', data);
+        responseData = (!data.error) ? data.data : mockData;
     }, (error) => {
-        console.log('stale local data', surveyData)
+        console.log('stale local data', mockData);
+        responseData = mockData;
     });
 
     const thisSketch = ( sketch ) => {
         sketch.preload = () => projectCanvas.preload(sketch);
-        sketch.setup = () => projectCanvas.setup(sketch, surveyData);
+        sketch.setup = () => projectCanvas.setup(sketch, responseData);
         sketch.draw = () => projectCanvas.draw(sketch);
         sketch.windowResized = () => projectCanvas.windowResized(sketch);
     };
