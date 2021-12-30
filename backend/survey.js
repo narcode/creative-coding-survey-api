@@ -35,9 +35,7 @@ function yesNoDefaultYes(x) {
 
 function arrayExclude(exclude) {
   const excludeSet = new Set(exclude);
-  return (array) => {
-    array.filter(x => !excludeSet.has(x));
-  };
+  return (array) => array.filter(x => !excludeSet.has(x));
 }
 
 function splitNewlines(x) {
