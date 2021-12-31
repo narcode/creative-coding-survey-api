@@ -1,3 +1,5 @@
+#!/bin/sh
+
 if ! git pull; then
     echo git pull failed. Stopping deployment.
     exit 1
