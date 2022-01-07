@@ -26,7 +26,7 @@ function main() {
   const dbPool  = createPool(process.env.MAPPING_DB_PASSWORD);
 
   app.use(allowCORS);
-
+  
   routes.forEach(([path, makeHandler]) => {
     app.get(path, makeHandler(dbPool));
   });

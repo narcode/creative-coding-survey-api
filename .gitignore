@@ -136,7 +136,6 @@ dmypy.json
 
 # pm2
 ecosystem.config.js
-
 devnotes.md
 *.env
 node_modules

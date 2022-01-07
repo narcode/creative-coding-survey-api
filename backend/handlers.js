@@ -3,6 +3,7 @@ const responses = require('./responses.js');
 function getResponses(dbPool) {
   return (req, res) => {
     responses.retrieveAll(dbPool, (err, rows) => {
+
       if (err != null) {
         res.status(500).send({error: true, message: "Server error"});
       } else {
