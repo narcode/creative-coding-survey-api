@@ -22,10 +22,9 @@ jobs:
     steps:
       - uses: appleboy/ssh-action@master
       # Runs a single command using the runners shell
-        with: 
+        with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           port: ${{ secrets.PORT }}
           key: ${{ secrets.SSHKEY }}
-          script: cd /var/www/creative-coding-survey-api && git pull
-
+          script: cd /var/www/creative-coding-survey-api && scripts/deploy.sh
