@@ -1,8 +1,9 @@
-const creativeCoders = require('./creative_coders.js');
+const responses = require('./responses.js');
 
-function getCreativeCoders(dbPool) {
+function getResponses(dbPool) {
   return (req, res) => {
-    creativeCoders.retrieveAll(dbPool, (err, rows) => {
+    responses.retrieveAll(dbPool, (err, rows) => {
+
       if (err != null) {
         res.status(500).send({error: true, message: "Server error"});
       } else {
@@ -12,13 +13,13 @@ function getCreativeCoders(dbPool) {
   };
 }
 
-function getCreativeCoder(dbPool) {
+function getResponse(dbPool) {
   return (req, res) => {
     const id = parseInt(req.params.id);
     if (!Number.isFinite(id)) {
       res.status(400).send({error: true, message: "Invalid id"});
     } else {
-      creativeCoders.retrieve(dbPool, id, (err, creativeCoder) => {
+      responses.retrieve(dbPool, id, (err, creativeCoder) => {
         if (err != null) {
           res.status(500).send({error: true, message: "Server error"});
         } else if (creativeCoder == null) {
@@ -32,6 +33,6 @@ function getCreativeCoder(dbPool) {
 }
 
 exports.routes = [
-  ['/creative-coders', getCreativeCoders],
-  ['/creative-coders/:id', getCreativeCoder],
+  ['/responses', getResponses],
+  ['/responses/:id', getResponse],
 ]

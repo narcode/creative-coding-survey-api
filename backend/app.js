@@ -13,11 +13,20 @@ function createPool(password) {
   });
 }
 
+function allowCORS(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Content-Security-Policy', "default-src * 'unsafe-inline'");
+
+  next();
+}
+
 function main() {
   const port = process.env.CREATIVE_CODING_API_PORT;
   const app = express();
   const dbPool  = createPool(process.env.MAPPING_DB_PASSWORD);
 
+  app.use(allowCORS);
+  
   routes.forEach(([path, makeHandler]) => {
     app.get(path, makeHandler(dbPool));
   });
