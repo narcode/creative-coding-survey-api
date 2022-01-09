@@ -52,7 +52,20 @@ a {
   }
 }
 
-
 a:hover, .item a:hover::after {
   color: #ccc;
+}
+
+.filters{
+  padding: 3px;
+background-color: white;
+border: 2px solid red;
+z-index: 1;
+}
+
+.highlighted{
+  border: 2px solid red;
+  height: 22px !important;
+width: 22px !important;
+border-radius: 10px;
 }

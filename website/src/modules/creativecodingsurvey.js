@@ -40,6 +40,10 @@ export class CreativeCodingSurvey {
         sketch.createCanvas(sketch.windowWidth, sketch.windowHeight)
 
         // create definitive set of results,
+        let discplines = sketch.createDiv("+").position(40, 100).id('filter-disciplines')
+            .class('filters')
+            .mouseOver( function (){ showDisciplines(sketch, 30, 90) } )
+
         this.surveyData.map((responseEntity) => {
             const randX         = sketch.round(sketch.random(0, window.innerWidth));
             const randY         = sketch.round(sketch.random(0, window.innerHeight));
@@ -47,8 +51,9 @@ export class CreativeCodingSurvey {
 
             this.typeCount[entityType]++;
 
-            let clickable = sketch.createDiv().position(randX, randY+100)
+            let clickable = sketch.createDiv().position(randX, randY+100).id(responseEntity.id)
                 .style("height", "20px").style("width", "20px")
+                .class( 'disciplines' in responseEntity.responses ? responseEntity.responses.disciplines.join(' ') : '' )
                 .style("background-image", "url(" + this.altSet[entityType] + ')').style("background-size", "contain")
                 .mouseOver( function (){ showDetails(sketch, responseEntity, randX-10, randY+90) } )
 
@@ -70,19 +75,39 @@ export class CreativeCodingSurvey {
 
         function showDetails(sketch, e, x, y) {
             console.log(e.responses);
-            let show = sketch.createDiv().position(x, y).id(e.id)
+            let elemId = 'd_' + e.id;
+            let show = sketch.createDiv().position(x, y).id(elemId)
                 .style("background", "white")
                 .style("border", "2px solid red")
                 .style("padding", "3px")
-                .html("<div style='padding:10px; font-size:75%;' onmouseleave='(function(){ let a = document.getElementById(" + e.id + "); a.remove(); })()'>"
+                .html("<div style='padding:10px; font-size:75%;' onmouseleave='(function(){ let a = document.getElementById(\"" + elemId + "\"); a.remove(); })()'>"
                     + "<div>" + replaceUndefined(e.responses.name) + "</div>"
                     + "<div>" + replaceUndefined(e.responses.website) + "</div>"
                     + "<div>" + replaceUndefined(e.responses.countryOfResidence) + "</div>"
-                    + "<div style='color: red'>" + ('discplines' in e.responses ? e.responses.disciplines.join(' ') : '') + "</div>"
+                    + "<div style='color: red'>" + ('disciplines' in e.responses ? e.responses.disciplines.join(' ') : '') + "</div>"
                     + "<div style='color: green'>" + ('tools' in e.responses ? e.responses.tools.join(' ') : '') + "</div>"
                     + "</div>"
                     );
             }
+
+            function showDisciplines(sketch, x, y) {
+                let show = sketch.createDiv().position(x, y).id('disciplines')
+                    .style("background", "white")
+                    .style("border", "2px solid red")
+                    .style("padding", "3px")
+                    .style("z-index", "2")
+                    .html("<div style='padding:10px; font-size:75%;' onmouseleave='(function(){ let a = document.getElementById(\"disciplines\"); a.remove(); })()'>"
+                        + "<div class='category' onclick='highlightEntities(\"Design\")'>Design</div>"
+                        + "<div class='category' onclick='highlightEntities(\"Art\")'>Art</div>"
+                        + "<div class='category' onclick='highlightEntities(\"Education\")'> Education</div>"
+                        + "<div class='category' onclick='highlightEntities(\"Music\")'>Music</div>"
+                        + "<div class='category' onclick='highlightEntities(\"Performance\")'>Performance</div>"
+                        + "<div class='category' onclick='highlightEntities(\"Science\")'>Science</div>"
+                        + "<div class='category' onclick='highlightEntities(\"Digital Culture\")'>Digital Culture</div>"
+                        + "<div class='category' onclick='highlightEntities(\"Live Coding\")'>Live Coding</div>"
+                        + "</div>"
+                        );
+                }
 
         function replaceUndefined(s) {
             return s === undefined ? 'anonymous' : s
@@ -144,6 +169,7 @@ export default element => {
         };
 
         let myp5 = new P5(thisSketch);
+        entities = responseData;
     }
 
 };
