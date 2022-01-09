@@ -88,8 +88,8 @@ export class CreativeCodingSurvey {
                     + "<div>" + replaceUndefined(e.responses.name) + "</div>"
                     + "<div>" + replaceUndefined(e.responses.website) + "</div>"
                     + "<div>" + replaceUndefined(e.responses.countryOfResidence) + "</div>"
-                    + "<div style='color: red'>" + e.responses.disciplines.join(' ') + "</div>"
-                    + "<div style='color: green'>" + e.responses.tools.join(' ') + "</div>"
+                    + "<div style='color: red'>" + ('discplines' in e.responses ? e.responses.disciplines.join(' ') : '') + "</div>"
+                    + "<div style='color: green'>" + ('tools' in e.responses ? e.responses.tools.join(' ') : '') + "</div>"
                     + "</div>"
                     );
             }
