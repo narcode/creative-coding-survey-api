@@ -32,8 +32,10 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: './dist/index.html'
-        })
+            inject: true,
+            template: "template.html",
+            filename:'index.html'
+        }),
     ],
     watch: true
 };
