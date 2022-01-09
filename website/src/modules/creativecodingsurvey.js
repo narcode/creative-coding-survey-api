@@ -13,21 +13,13 @@ export class CreativeCodingSurvey {
     }
 
     preload(sketch) {
-        this.iconSet['enthusiast']      = sketch.loadImage('/img/enthusiast.svg')
-        this.iconSet['maker']           = sketch.loadImage('/img/maker.svg')
-        this.iconSet['organisation']    = sketch.loadImage('/img/venue.svg')
-        this.iconSet['contributor']     = sketch.loadImage('/img/contributor.svg')
-        this.iconSet['venue']           = sketch.loadImage('/img/venue.svg')
-        this.iconSet['event']           = sketch.loadImage('/img/event.svg')
-        this.iconSet['anonymous']       = sketch.loadImage('/img/anonymous.svg')
-
-        this.altSet['enthusiast']      = '/img/enthusiast.svg'
-        this.altSet['maker']           = '/img/maker.svg'
-        this.altSet['organisation']    = '/img/venue.svg'
-        this.altSet['contributor']     = '/img/contributor.svg'
-        this.altSet['venue']           = '/img/venue.svg'
-        this.altSet['event']           = '/img/event.svg'
-        this.altSet['anonymous']       = '/img/anonymous.svg'
+        this.altSet['enthusiast']      = './img/enthusiast.svg'
+        this.altSet['maker']           = './img/maker.svg'
+        this.altSet['organisation']    = './img/venue.svg'
+        this.altSet['contributor']     = './img/contributor.svg'
+        this.altSet['venue']           = './img/venue.svg'
+        this.altSet['event']           = './img/event.svg'
+        this.altSet['anonymous']       = './img/anonymous.svg'
     }
 
     setup(sketch, surveyData) {
@@ -65,10 +57,8 @@ export class CreativeCodingSurvey {
                 entity: responseEntity,
                 coordinates: { x: randX, y: randY },
                 state: 'inactive',
-                draw: () => {
-                    // sketch.image(this.iconSet[entityType], randX, randY);
-                }}
-            );
+                draw: () => {}
+            });
         });
 
         for (const [type, count] of Object.entries(this.typeCount)) {
@@ -121,8 +111,9 @@ export class CreativeCodingSurvey {
             this.iconSet[icon].resize(20,20);
         }
     }
-    
 }
+
+
 
 
 const projectCanvas = new CreativeCodingSurvey();
@@ -136,18 +127,23 @@ export default element => {
     loadJSON(`${apiURI}/${apiEndpoint}`, (data) => {
         console.log('fresh live data', data);
         responseData = (!data.error) ? data.data : mockData;
+        initialiseSketch(responseData)
     }, (error) => {
         console.log('stale local data', mockData);
         responseData = mockData;
     });
 
-    const thisSketch = ( sketch ) => {
-        sketch.preload = () => projectCanvas.preload(sketch);
-        sketch.setup = () => projectCanvas.setup(sketch, responseData);
-        sketch.draw = () => projectCanvas.draw(sketch);
-        sketch.windowResized = () => projectCanvas.windowResized(sketch);
-        sketch.disableFirendlyErrors = true;
-    };
 
-    let myp5 = new P5(thisSketch);
+    const initialiseSketch = function(responseData) {
+        const thisSketch = ( sketch ) => {
+            sketch.preload = () => projectCanvas.preload(sketch);
+            sketch.setup = () => projectCanvas.setup(sketch, responseData);
+            sketch.draw = () => projectCanvas.draw(sketch);
+            sketch.windowResized = () => projectCanvas.windowResized(sketch);
+            sketch.disableFirendlyErrors = true;
+        };
+
+        let myp5 = new P5(thisSketch);
+    }
+
 };
