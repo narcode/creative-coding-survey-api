@@ -139,3 +139,5 @@ ecosystem.config.js
 devnotes.md
 *.env
 node_modules
+
+.DS_Store
