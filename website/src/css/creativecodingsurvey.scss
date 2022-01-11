@@ -7,11 +7,43 @@ body {
   position: relative;
 }
 
-canvas {
-  width: 100%;
-  height: 100%;
+div,
+section {
+  &.disciplines-container,
+  &.entity-details {
+    padding: 3px;
+    border: 2px solid red;
+
+    position: absolute;
+    z-index: 2;
+
+    background-color: #fff;
+  }
 }
 
+.entity-container {
+  position: absolute;
+
+  & > div {
+    display: none;
+    padding: 2rem 1rem 1rem;
+
+    left: -8px;
+    top: -8px;
+
+    font-size: 75%;
+  }
+  &:hover {
+    z-index: 10;
+
+    & > div {
+      display: block;
+      background-repeat: no-repeat;
+      background-size: 20px;
+      background-position: 6px 6px;
+    }
+  }
+}
 
 
 * {
