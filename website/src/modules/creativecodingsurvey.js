@@ -23,6 +23,7 @@ export class CreativeCodingSurvey {
     }
 
     setup(sketch, surveyData) {
+        // history.replaceState('','','👾.creativecodingutrecht.nl');
         this.sketch             = sketch;
         this.surveyData         = surveyData;
         this.typeCount          = {
@@ -46,7 +47,7 @@ export class CreativeCodingSurvey {
 
         this.surveyData.map((responseEntity) => {
             const randX         = sketch.round(sketch.random(0, window.innerWidth));
-            const randY         = sketch.round(sketch.random(0, window.innerHeight));
+            const randY         = sketch.round(sketch.random(0, window.innerHeight)) + 100;
             const entityType    = responseEntity.responses.type.length ? responseEntity.responses.type[0].toString().toLowerCase().trim() : 'anonymous';
 
             this.typeCount[entityType]++;
@@ -55,7 +56,7 @@ export class CreativeCodingSurvey {
                 .style("height", "20px").style("width", "20px")
                 .class( 'disciplines' in responseEntity.responses ? responseEntity.responses.disciplines.join(' ') : '' )
                 .style("background-image", "url(" + this.altSet[entityType] + ')').style("background-size", "contain")
-                .mouseOver( function (){ showDetails(sketch, responseEntity, randX-10, randY+90) } )
+                .mouseOver( function (){ showDetails(sketch, responseEntity, randX-10, randY + 25) } )
 
             // add an initial entity position, randomly relative to the current viewport
             this.canvasEntitites.push({
@@ -168,7 +169,7 @@ export default element => {
             sketch.disableFirendlyErrors = true;
         };
 
-        let myp5 = new P5(thisSketch);
+        new P5(thisSketch);
         entities = responseData;
     }
 
