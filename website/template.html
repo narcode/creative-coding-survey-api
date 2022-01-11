@@ -31,7 +31,7 @@ function highlightEntities(s) {
     console.log(s);
     entities.map(i => { 
         let entity = document.getElementById(i.id);;
-        if (i.responses.disciplines.find(e => e == s) != undefined) {
+        if (i.responses.disciplines.find(e => e === s) !== undefined) {
             entity.classList.add('highlighted');
         } else {
             entity.classList.remove('highlighted');
