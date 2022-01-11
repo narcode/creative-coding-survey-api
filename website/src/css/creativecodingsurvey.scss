@@ -1,6 +1,10 @@
+@import 'icons.scss';
+
 body {
   margin: 0;
   overflow: hidden;
+
+  position: relative;
 }
 
 canvas {
@@ -63,9 +67,10 @@ border: 2px solid red;
 z-index: 1;
 }
 
-.highlighted{
-  border: 2px solid red;
-  height: 22px !important;
-width: 22px !important;
-border-radius: 10px;
+.highlighted {
+  box-shadow: var(--boxShadowX) var(--boxShadowY) 3px 0 #ff0000;
+
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
 }

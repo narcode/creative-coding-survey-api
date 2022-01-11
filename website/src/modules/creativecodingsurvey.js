@@ -9,21 +9,10 @@ export class CreativeCodingSurvey {
     constructor(element, options) {
         this.canvasEntitites    = [];
         this.iconSet            = [];
-        this.altSet            = [];
-    }
-
-    preload(sketch) {
-        this.altSet['enthusiast']      = './img/enthusiast.svg'
-        this.altSet['maker']           = './img/maker.svg'
-        this.altSet['organisation']    = './img/venue.svg'
-        this.altSet['contributor']     = './img/contributor.svg'
-        this.altSet['venue']           = './img/venue.svg'
-        this.altSet['event']           = './img/event.svg'
-        this.altSet['anonymous']       = './img/anonymous.svg'
+        this.altSet             = [];
     }
 
     setup(sketch, surveyData) {
-        // history.replaceState('','','👾.creativecodingutrecht.nl');
         this.sketch             = sketch;
         this.surveyData         = surveyData;
         this.typeCount          = {
@@ -36,9 +25,16 @@ export class CreativeCodingSurvey {
             anonymous: 0,
         };
 
-        this.resizeIcons();
+        function lerpCoordinates(mousePosition, boundingMin, boundingMax, lerpMin, lerpMax) {
+            return (mousePosition - boundingMin)/(boundingMax - boundingMin) * (lerpMax - lerpMin) + lerpMin;
+        }
+        let root = document.documentElement;
+        root.addEventListener("mousemove", e => {
+            root.style.setProperty('--boxShadowX', `${lerpCoordinates((window.innerWidth/2 - e.clientX), 0, -window.innerWidth, 0, 3)}px`);
+            root.style.setProperty('--boxShadowY', `${lerpCoordinates((window.innerHeight/2 - e.clientY), 0, -window.innerHeight, 0, 3)}px`);
+        });
 
-        sketch.createCanvas(sketch.windowWidth, sketch.windowHeight)
+        // sketch.createCanvas(sketch.windowWidth, sketch.windowHeight)
 
         // create definitive set of results,
         let discplines = sketch.createDiv("+").position(40, 100).id('filter-disciplines')
@@ -52,11 +48,22 @@ export class CreativeCodingSurvey {
 
             this.typeCount[entityType]++;
 
-            let clickable = sketch.createDiv().position(randX, randY+100).id(responseEntity.id)
-                .style("height", "20px").style("width", "20px")
-                .class( 'disciplines' in responseEntity.responses ? responseEntity.responses.disciplines.join(' ') : '' )
-                .style("background-image", "url(" + this.altSet[entityType] + ')').style("background-size", "contain")
-                .mouseOver( function (){ showDetails(sketch, responseEntity, randX-10, randY + 25) } )
+            let clickableEntity             = document.createElement('div');
+            clickableEntity.id              = responseEntity.id;
+            clickableEntity.style.left      = `${randX}px`;
+            clickableEntity.style.top       = `${randY + 100}px`;
+
+            for (let entityDiscipline of responseEntity.responses.disciplines) {
+                console.log(responseEntity.responses,entityDiscipline)
+                clickableEntity.classList.add(entityDiscipline.toLowerCase().replace(' ',''));
+            }
+            clickableEntity.classList.add( `icon`, `icon-${entityType}`);
+
+            document.body.appendChild(clickableEntity)
+
+            clickableEntity.addEventListener('mouseover', function (){
+                showDetails(sketch, responseEntity, randX-10, randY + 25) }
+            );
 
             // add an initial entity position, randomly relative to the current viewport
             this.canvasEntitites.push({
@@ -91,7 +98,7 @@ export class CreativeCodingSurvey {
                     );
             }
 
-            function showDisciplines(sketch, x, y) {
+        function showDisciplines(sketch, x, y) {
                 let show = sketch.createDiv().position(x, y).id('disciplines')
                     .style("background", "white")
                     .style("border", "2px solid red")
@@ -162,7 +169,6 @@ export default element => {
 
     const initialiseSketch = function(responseData) {
         const thisSketch = ( sketch ) => {
-            sketch.preload = () => projectCanvas.preload(sketch);
             sketch.setup = () => projectCanvas.setup(sketch, responseData);
             sketch.draw = () => projectCanvas.draw(sketch);
             sketch.windowResized = () => projectCanvas.windowResized(sketch);
