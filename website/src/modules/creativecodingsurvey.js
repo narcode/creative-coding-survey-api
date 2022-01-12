@@ -9,7 +9,7 @@ export class CreativeCodingSurvey {
         this.allDisciplines     = [];
         this.altSet             = [];
 
-        this.surveyData         = responseData;
+        this.surveyData         = window.entities = responseData;
         this.typeCount          = {
             enthusiast: 0,
             maker: 0,
@@ -23,8 +23,8 @@ export class CreativeCodingSurvey {
         let root = document.documentElement;
         root.addEventListener("mousemove", e => {
             let boxShadow = {
-                x: this.lerpCoordinates((window.innerWidth/2 - e.clientX), 0, -window.innerWidth, 0, 3),
-                y: this.lerpCoordinates((window.innerHeight/2 - e.clientY), 0, -window.innerHeight, 0, 3)
+                x: this.lerpCoordinates((window.innerWidth/2 - e.clientX), 0, -window.innerWidth, 0, 5),
+                y: this.lerpCoordinates((window.innerHeight/2 - e.clientY), 0, -window.innerHeight, 0, 5)
             };
 
             root.style.setProperty('--boxShadowX', `${boxShadow.x}px`);
@@ -32,10 +32,29 @@ export class CreativeCodingSurvey {
         });
 
         let disciplinesFilter = document.createElement('div');
-        disciplinesFilter.classList.add('filers','filter-disciplines');
+        disciplinesFilter.classList.add('filter','filter-disciplines');
+        disciplinesFilter.id        = 'filter-disciplines';
         disciplinesFilter.innerText = '+';
-        disciplinesFilter.addEventListener('hover', () => this.showDisciplines(30, 90))
+
         document.body.appendChild(disciplinesFilter);
+
+        disciplinesFilter.addEventListener('mouseover', (event) => {
+            if (!document.getElementById('disciplines-container')) {
+                let disciplinesContainer = this.showDisciplines(30, 90);
+                event.target.appendChild(disciplinesContainer);
+
+                disciplinesContainer.addEventListener('click', (event) => {
+                    const isLi = event.target.nodeName === 'LI';
+                    if (!isLi) {
+                        return;
+                    }
+
+                    console.log(event.target);
+                    this.highlightEntities(event.target.innerText);
+                })
+            }
+        });
+
 
         this.surveyData.map((responseEntity) => {
             const randX         = Math.floor(Math.random() * window.innerWidth);
@@ -87,41 +106,49 @@ export class CreativeCodingSurvey {
     }
 
     showDetails(entity, x, y) {
-        console.log(entity.responses);
+        // console.log(entity.responses);
 
         let entityDetails           = document.createElement('div');
         entityDetails.id            = 'd_' + entity.id;
         entityDetails.className     = 'entity-details';
         entityDetails.innerHTML     = `
-<!--                <div style='padding:10px; font-size:75%;' onmouseleave='(function(){ let a = document.getElementById(\"" + elemId + "\"); a.remove(); })()'>"-->
             <div>${this.replaceUndefined(entity.responses.name)}</div>
             <div>${this.replaceUndefined(entity.responses.website)}</div>
             <div>${this.replaceUndefined(entity.responses.countryOfResidence)}</div>
-            <div style='color: red'>${('disciplines' in entity.responses ? entity.responses.disciplines.join(' ') : '')}</div>
-            <div style='color: green'>${('tools' in entity.responses ? entity.responses.tools.join(' ') : '')}</div>
-<!--            </div>-->
-`;
+            <div class="entity-details__disciplines">${('disciplines' in entity.responses ? entity.responses.disciplines.join(' ') : '')}</div>
+            <div class="entity-details__tools">${('tools' in entity.responses ? entity.responses.tools.join(' ') : '')}</div>`;
+
         return entityDetails;
     }
 
     showDisciplines(x, y) {
         let disciplinesContainer = document.createElement('ul');
         disciplinesContainer.classList.add('disciplines-container');
+        disciplinesContainer.id         = 'disciplines-container';
         disciplinesContainer.style.left = `${x}px`;
         disciplinesContainer.style.top  = `${y}px`;
 
-        let show = sketch.createDiv().position(x, y).id('disciplines')
-            .html("<div style='padding:10px; font-size:75%;' onmouseleave='(function(){ let a = document.getElementById(\"disciplines\"); a.remove(); })()'>"
-                + "<div class='category' onclick='highlightEntities(\"Design\")'>Design</div>"
-                + "<div class='category' onclick='highlightEntities(\"Art\")'>Art</div>"
-                + "<div class='category' onclick='highlightEntities(\"Education\")'> Education</div>"
-                + "<div class='category' onclick='highlightEntities(\"Music\")'>Music</div>"
-                + "<div class='category' onclick='highlightEntities(\"Performance\")'>Performance</div>"
-                + "<div class='category' onclick='highlightEntities(\"Science\")'>Science</div>"
-                + "<div class='category' onclick='highlightEntities(\"Digital Culture\")'>Digital Culture</div>"
-                + "<div class='category' onclick='highlightEntities(\"Live Coding\")'>Live Coding</div>"
-                + "</div>"
-            );
+        /** todo roll through the know list of disciplines here **/
+        disciplinesContainer.innerHTML  = `
+            <li>Design</li>
+            <li>Art</li>
+            <li>Education</li>
+            <li>Music</li>
+            <li>Performance</li>
+            <li>Science</li>
+            <li>Digital Culture</li>
+            <li>Live Coding</li>`;
+
+        return disciplinesContainer;
+    }
+
+    highlightEntities(s) {
+        let f = document.getElementById('filter-disciplines');
+        f.innerText = "+ " + s;
+        window.entities.map(i => {
+            let entity = document.getElementById(i.id);
+            entity.classList.toggle('entity-container--highlighted', (i.responses.disciplines.find(e => e === s) !== undefined));
+        });
     }
 
     replaceUndefined(s) {
