@@ -1,6 +1,10 @@
+@import 'icons.scss';
+
 body {
   margin: 0;
   overflow: hidden;
+
+  position: relative;
 }
 
 canvas {
@@ -52,7 +56,21 @@ a {
   }
 }
 
-
 a:hover, .item a:hover::after {
   color: #ccc;
+}
+
+.filters{
+  padding: 3px;
+background-color: white;
+border: 2px solid red;
+z-index: 1;
+}
+
+.highlighted {
+  box-shadow: var(--boxShadowX) var(--boxShadowY) 3px 0 #ff0000;
+
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
 }

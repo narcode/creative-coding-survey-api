@@ -9,17 +9,7 @@ export class CreativeCodingSurvey {
     constructor(element, options) {
         this.canvasEntitites    = [];
         this.iconSet            = [];
-        this.altSet            = [];
-    }
-
-    preload(sketch) {
-        this.altSet['enthusiast']      = './img/enthusiast.svg'
-        this.altSet['maker']           = './img/maker.svg'
-        this.altSet['organisation']    = './img/venue.svg'
-        this.altSet['contributor']     = './img/contributor.svg'
-        this.altSet['venue']           = './img/venue.svg'
-        this.altSet['event']           = './img/event.svg'
-        this.altSet['anonymous']       = './img/anonymous.svg'
+        this.altSet             = [];
     }
 
     setup(sketch, surveyData) {
@@ -35,22 +25,45 @@ export class CreativeCodingSurvey {
             anonymous: 0,
         };
 
-        this.resizeIcons();
+        function lerpCoordinates(mousePosition, boundingMin, boundingMax, lerpMin, lerpMax) {
+            return (mousePosition - boundingMin)/(boundingMax - boundingMin) * (lerpMax - lerpMin) + lerpMin;
+        }
+        let root = document.documentElement;
+        root.addEventListener("mousemove", e => {
+            root.style.setProperty('--boxShadowX', `${lerpCoordinates((window.innerWidth/2 - e.clientX), 0, -window.innerWidth, 0, 3)}px`);
+            root.style.setProperty('--boxShadowY', `${lerpCoordinates((window.innerHeight/2 - e.clientY), 0, -window.innerHeight, 0, 3)}px`);
+        });
 
-        sketch.createCanvas(sketch.windowWidth, sketch.windowHeight)
+        // sketch.createCanvas(sketch.windowWidth, sketch.windowHeight)
 
         // create definitive set of results,
+        let discplines = sketch.createDiv("+").position(40, 100).id('filter-disciplines')
+            .class('filters')
+            .mouseOver( function (){ showDisciplines(sketch, 30, 90) } )
+
         this.surveyData.map((responseEntity) => {
             const randX         = sketch.round(sketch.random(0, window.innerWidth));
-            const randY         = sketch.round(sketch.random(0, window.innerHeight));
+            const randY         = sketch.round(sketch.random(0, window.innerHeight)) + 100;
             const entityType    = responseEntity.responses.type.length ? responseEntity.responses.type[0].toString().toLowerCase().trim() : 'anonymous';
 
             this.typeCount[entityType]++;
 
-            let clickable = sketch.createDiv().position(randX, randY+100)
-                .style("height", "20px").style("width", "20px")
-                .style("background-image", "url(" + this.altSet[entityType] + ')').style("background-size", "contain")
-                .mouseOver( function (){ showDetails(sketch, responseEntity, randX-10, randY+90) } )
+            let clickableEntity             = document.createElement('div');
+            clickableEntity.id              = responseEntity.id;
+            clickableEntity.style.left      = `${randX}px`;
+            clickableEntity.style.top       = `${randY + 100}px`;
+
+            for (let entityDiscipline of responseEntity.responses.disciplines) {
+                console.log(responseEntity.responses,entityDiscipline)
+                clickableEntity.classList.add(entityDiscipline.toLowerCase().replace(' ',''));
+            }
+            clickableEntity.classList.add( `icon`, `icon-${entityType}`);
+
+            document.body.appendChild(clickableEntity)
+
+            clickableEntity.addEventListener('mouseover', function (){
+                showDetails(sketch, responseEntity, randX-10, randY + 25) }
+            );
 
             // add an initial entity position, randomly relative to the current viewport
             this.canvasEntitites.push({
@@ -70,19 +83,39 @@ export class CreativeCodingSurvey {
 
         function showDetails(sketch, e, x, y) {
             console.log(e.responses);
-            let show = sketch.createDiv().position(x, y).id(e.id)
+            let elemId = 'd_' + e.id;
+            let show = sketch.createDiv().position(x, y).id(elemId)
                 .style("background", "white")
                 .style("border", "2px solid red")
                 .style("padding", "3px")
-                .html("<div style='padding:10px; font-size:75%;' onmouseleave='(function(){ let a = document.getElementById(" + e.id + "); a.remove(); })()'>"
+                .html("<div style='padding:10px; font-size:75%;' onmouseleave='(function(){ let a = document.getElementById(\"" + elemId + "\"); a.remove(); })()'>"
                     + "<div>" + replaceUndefined(e.responses.name) + "</div>"
                     + "<div>" + replaceUndefined(e.responses.website) + "</div>"
                     + "<div>" + replaceUndefined(e.responses.countryOfResidence) + "</div>"
-                    + "<div style='color: red'>" + ('discplines' in e.responses ? e.responses.disciplines.join(' ') : '') + "</div>"
+                    + "<div style='color: red'>" + ('disciplines' in e.responses ? e.responses.disciplines.join(' ') : '') + "</div>"
                     + "<div style='color: green'>" + ('tools' in e.responses ? e.responses.tools.join(' ') : '') + "</div>"
                     + "</div>"
                     );
             }
+
+        function showDisciplines(sketch, x, y) {
+                let show = sketch.createDiv().position(x, y).id('disciplines')
+                    .style("background", "white")
+                    .style("border", "2px solid red")
+                    .style("padding", "3px")
+                    .style("z-index", "2")
+                    .html("<div style='padding:10px; font-size:75%;' onmouseleave='(function(){ let a = document.getElementById(\"disciplines\"); a.remove(); })()'>"
+                        + "<div class='category' onclick='highlightEntities(\"Design\")'>Design</div>"
+                        + "<div class='category' onclick='highlightEntities(\"Art\")'>Art</div>"
+                        + "<div class='category' onclick='highlightEntities(\"Education\")'> Education</div>"
+                        + "<div class='category' onclick='highlightEntities(\"Music\")'>Music</div>"
+                        + "<div class='category' onclick='highlightEntities(\"Performance\")'>Performance</div>"
+                        + "<div class='category' onclick='highlightEntities(\"Science\")'>Science</div>"
+                        + "<div class='category' onclick='highlightEntities(\"Digital Culture\")'>Digital Culture</div>"
+                        + "<div class='category' onclick='highlightEntities(\"Live Coding\")'>Live Coding</div>"
+                        + "</div>"
+                        );
+                }
 
         function replaceUndefined(s) {
             return s === undefined ? 'anonymous' : s
@@ -136,14 +169,14 @@ export default element => {
 
     const initialiseSketch = function(responseData) {
         const thisSketch = ( sketch ) => {
-            sketch.preload = () => projectCanvas.preload(sketch);
             sketch.setup = () => projectCanvas.setup(sketch, responseData);
             sketch.draw = () => projectCanvas.draw(sketch);
             sketch.windowResized = () => projectCanvas.windowResized(sketch);
             sketch.disableFirendlyErrors = true;
         };
 
-        let myp5 = new P5(thisSketch);
+        new P5(thisSketch);
+        entities = responseData;
     }
 
 };
