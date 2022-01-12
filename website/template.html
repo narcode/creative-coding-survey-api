@@ -24,20 +24,6 @@
 </body>
 
 <script>
-let entities = []; // exposing the entities to the console for some live coding in the browser
-
-function highlightEntities(s) {
-    let f = document.getElementById('filter-disciplines');
-    f.innerText = "+ " + s;
-    console.log(s);
-    entities.map(i => { 
-        let entity = document.getElementById(i.id);
-        if (i.responses.disciplines.find(e => e === s) !== undefined) {
-            entity.classList.add('highlighted');
-        } else {
-            entity.classList.remove('highlighted');
-        }
-    });
-}
+    window.entities = []; // exposing the entities to the window/console for some live coding in the browser
 </script>
 </html>
