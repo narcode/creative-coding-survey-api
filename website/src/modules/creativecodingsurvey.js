@@ -5,11 +5,12 @@ import '../css/creativecodingsurvey.scss';
 
 export class CreativeCodingSurvey {
     constructor(element, responseData) {
-        this.canvasEntitites    = [];
-        this.allDisciplines     = [];
-        this.altSet             = [];
-
+        // start by exposing the survey data to the DOM and window instance
+        // values of the window entries will update along with the state
         this.surveyData         = window.entities = responseData;
+        this.domEntitites       = window.DOMEntities = [];
+
+        this.allDisciplines     = [];
         this.typeCount          = {
             enthusiast: 0,
             maker: 0,
@@ -40,7 +41,7 @@ export class CreativeCodingSurvey {
 
         disciplinesFilter.addEventListener('mouseover', (event) => {
             if (!document.getElementById('disciplines-container')) {
-                let disciplinesContainer = this.showDisciplines(30, 90);
+                let disciplinesContainer = this.createDisciplinesFilter(30, 90);
                 event.target.appendChild(disciplinesContainer);
 
                 disciplinesContainer.addEventListener('click', (event) => {
@@ -55,63 +56,31 @@ export class CreativeCodingSurvey {
             }
         });
 
-
+        // this is where we're creating entities
         this.surveyData.map((responseEntity) => {
-            const randX         = Math.floor(Math.random() * window.innerWidth);
-            const randY         = Math.floor(Math.random() * window.innerHeight);
-            const entityType    = responseEntity.responses.type.length ? responseEntity.responses.type[0].toString().toLowerCase().trim() : 'anonymous';
-
-            this.typeCount[entityType]++;
-
-            let clickableEntity             = document.createElement('div');
-            clickableEntity.id              = responseEntity.id;
-            clickableEntity.style.left      = `${randX}px`;
-            clickableEntity.style.top       = `${randY + 100}px`;
-
-            for (let entityDiscipline of responseEntity.responses.disciplines) {
-                // collect all unique disciplines in a designated array
-                if (this.allDisciplines.indexOf(entityDiscipline) === -1) {
-                    this.allDisciplines.push(entityDiscipline)
-                }
-                // decorate icon with a recognisable className
-                clickableEntity.classList.add(entityDiscipline.toLowerCase().replace(' ',''));
-            }
-            clickableEntity.classList.add( `entity-container`, `icon`, `icon-${entityType}`);
-
-            document.body.appendChild(clickableEntity);
-
-            clickableEntity.addEventListener('mouseover', (event) => {
-                if (!document.getElementById('d_' + responseEntity.id)) {
-                    event.target.appendChild(
-                        this.showDetails(responseEntity, randX - 10, randY + 25)
-                    );
-                }
-            });
-
-            // add an initial entity position, randomly relative to the current viewport
-            this.canvasEntitites.push({
-                entity: responseEntity,
-                coordinates: { x: randX, y: randY },
-                state: 'inactive',
-                draw: () => {}
-            });
+            DOMEntities.push(new DOMEntity(responseEntity, this));
         });
 
-        for (const [type, count] of Object.entries(this.typeCount)) {
-            const typeContainer = document.querySelector( `.menu li.${type} a`);
-            typeContainer.setAttribute('data-value', count);
-        }
+        // update all type totals in top nav
+        this.updateTypeTotals();
+
+        // set total number of entities in top nav
         const totalCountContainer = document.querySelector( `.menu li:first-of-type`);
         totalCountContainer.setAttribute('data-value', this.surveyData.length);
     }
 
-    showDetails(entity, x, y) {
-        // console.log(entity.responses);
+    updateTypeTotals() {
+        for (const [type, count] of Object.entries(this.typeCount)) {
+            const typeContainer = document.querySelector( `.menu li.${type} a`);
+            typeContainer.setAttribute('data-value', count);
+        }
+    }
 
+    showEntityDetails(entity, x, y) {
         let entityDetails           = document.createElement('div');
-        entityDetails.id            = 'd_' + entity.id;
-        entityDetails.className     = 'entity-details';
-        entityDetails.innerHTML     = `
+            // entityDetails.id            = 'd_' + entity.id;
+            entityDetails.className     = 'entity-details';
+            entityDetails.innerHTML     = `
             <div>${this.replaceUndefined(entity.responses.name)}</div>
             <div>${this.replaceUndefined(entity.responses.website)}</div>
             <div>${this.replaceUndefined(entity.responses.countryOfResidence)}</div>
@@ -121,23 +90,16 @@ export class CreativeCodingSurvey {
         return entityDetails;
     }
 
-    showDisciplines(x, y) {
+    createDisciplinesFilter(x, y) {
         let disciplinesContainer = document.createElement('ul');
-        disciplinesContainer.classList.add('disciplines-container');
-        disciplinesContainer.id         = 'disciplines-container';
-        disciplinesContainer.style.left = `${x}px`;
-        disciplinesContainer.style.top  = `${y}px`;
+            disciplinesContainer.classList.add('disciplines-container');
+            disciplinesContainer.id         = 'disciplines-container';
+            disciplinesContainer.style.left = `${x}px`; /** do we want get these coords from wihtin js? tho **/
+            disciplinesContainer.style.top  = `${y}px`;
 
-        /** todo roll through the know list of disciplines here **/
-        disciplinesContainer.innerHTML  = `
-            <li>Design</li>
-            <li>Art</li>
-            <li>Education</li>
-            <li>Music</li>
-            <li>Performance</li>
-            <li>Science</li>
-            <li>Digital Culture</li>
-            <li>Live Coding</li>`;
+        this.allDisciplines.map((discipline, i) => {
+            disciplinesContainer.insertAdjacentHTML('beforeend', `<li>${discipline}</li>`)
+        });
 
         return disciplinesContainer;
     }
@@ -164,8 +126,47 @@ export class CreativeCodingSurvey {
     }
 }
 
+// this creates a unique DOM entity from a surveyData row
+export class DOMEntity {
+    constructor(responseEntity, instance) {
+        const randX         = Math.floor(Math.random() * window.innerWidth);
+        const randY         = Math.floor(Math.random() * window.innerHeight);
+        const entityType    = responseEntity.responses.type.length ? responseEntity.responses.type[0].toString().toLowerCase().trim() : 'anonymous';
 
+        instance.typeCount[entityType]++;
 
+        let clickableEntity         = document.createElement('div');
+        clickableEntity.id          = responseEntity.id;
+        clickableEntity.style.left  = `${randX}px`;
+        clickableEntity.style.top   = `${randY + 100}px`;
+        clickableEntity.setAttribute(`data-type`, entityType);
+
+        // collect all unique disciplines in a designated array
+        for (let entityDiscipline of responseEntity.responses.disciplines) {
+            if (instance.allDisciplines.indexOf(entityDiscipline) === -1) {
+                instance.allDisciplines.push(entityDiscipline)
+            }
+            // decorate icon with a recognisable className
+            clickableEntity.classList.add(entityDiscipline.toLowerCase().replace(' ',''));
+        }
+        clickableEntity.classList.add( `entity-container`, `icon`, `icon-${entityType}`);
+
+        document.body.appendChild(clickableEntity);
+
+        // we're adding the entity details container once, on the first hover, after that css does the showing and the hiding
+        clickableEntity.addEventListener('mouseover', (event) => {
+            if (!clickableEntity.querySelector('.entity-details')) {
+                event.target.appendChild(
+                    instance.showEntityDetails(responseEntity, randX - 10, randY + 25)
+                );
+            }
+        });
+
+        return clickableEntity;
+    }
+}
+
+// this is the default method executed when the project is loaded from the template initialisation
 export default element => {
     console.log('Component mounted on', element);
 
@@ -182,7 +183,6 @@ export default element => {
         responseData = mockData;
         startInstance(responseData);
     });
-
 
     const startInstance = (responseData) => {
         new CreativeCodingSurvey(element, responseData);
