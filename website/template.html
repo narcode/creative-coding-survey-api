@@ -7,36 +7,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100;0,200;0,300;0,500;1,100;1,200&display=swap" rel="stylesheet" />
 </head>
 <body>
-    <nav>
-        <ul class="menu">
-            <li class="item">Entities at Creative Coding Ecologies</li>
-            <li class="item maker">◎<a href="#">Makers</a></li>
-            <li class="item contributor">✢<a href="#">Contributors</a></li>
-            <li class="item enthusiast">✳<a href="#">Enthusiasts</a></li>
-            <li class="item organisation"><a href="#">Organisations</a></li>
-            <li class="item venue">☾<a href="#">Venues</a></li>
-            <li class="item event">☐<a href="#">Events</a></li>
-            <li class="item anonymous">☀<a href="#">Anonymous</a></li>
-        </ul>
-    </nav>
-    <div data-module="creativecodingsurvey"></div>
+    <div data-module="creativecodingsurvey">
+        <nav>
+            <ul class="menu">
+                <li class="item">Entities at Creative Coding Ecologies</li>
+                <li class="item maker">◎<a href="#">Makers</a></li>
+                <li class="item contributor">✢<a href="#">Contributors</a></li>
+                <li class="item enthusiast">✳<a href="#">Enthusiasts</a></li>
+                <li class="item organisation"><a href="#">Organisations</a></li>
+                <li class="item venue">☾<a href="#">Venues</a></li>
+                <li class="item event">☐<a href="#">Events</a></li>
+                <li class="item anonymous">☀<a href="#">Anonymous</a></li>
+            </ul>
+        </nav>
+    </div>
 </body>
 
 <script>
-let entities = []; // exposing the entities to the console for some live coding in the browser
-
-function highlightEntities(s) {
-    let f = document.getElementById('filter-disciplines');
-    f.innerText = "+ " + s;
-    console.log(s);
-    entities.map(i => { 
-        let entity = document.getElementById(i.id);;
-        if (i.responses.disciplines.find(e => e == s) != undefined) {
-            entity.classList.add('highlighted');
-        } else {
-            entity.classList.remove('highlighted');
-        }
-    });
-}
+    window.entities = []; // exposing the entities to the window/console for some live coding in the browser
 </script>
 </html>

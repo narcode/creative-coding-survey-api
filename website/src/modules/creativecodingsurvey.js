@@ -1,20 +1,15 @@
 import { loadJSON } from '../utils/ajax.js';
 import { mockData } from '../data/surveyData.js';
 
-import * as P5 from "p5";
-
 import '../css/creativecodingsurvey.scss';
 
 export class CreativeCodingSurvey {
-    constructor(element, options) {
+    constructor(element, responseData) {
         this.canvasEntitites    = [];
-        this.iconSet            = [];
+        this.allDisciplines     = [];
         this.altSet             = [];
-    }
 
-    setup(sketch, surveyData) {
-        this.sketch             = sketch;
-        this.surveyData         = surveyData;
+        this.surveyData         = window.entities = responseData;
         this.typeCount          = {
             enthusiast: 0,
             maker: 0,
@@ -25,25 +20,45 @@ export class CreativeCodingSurvey {
             anonymous: 0,
         };
 
-        function lerpCoordinates(mousePosition, boundingMin, boundingMax, lerpMin, lerpMax) {
-            return (mousePosition - boundingMin)/(boundingMax - boundingMin) * (lerpMax - lerpMin) + lerpMin;
-        }
         let root = document.documentElement;
         root.addEventListener("mousemove", e => {
-            root.style.setProperty('--boxShadowX', `${lerpCoordinates((window.innerWidth/2 - e.clientX), 0, -window.innerWidth, 0, 3)}px`);
-            root.style.setProperty('--boxShadowY', `${lerpCoordinates((window.innerHeight/2 - e.clientY), 0, -window.innerHeight, 0, 3)}px`);
+            let boxShadow = {
+                x: this.lerpCoordinates((window.innerWidth/2 - e.clientX), 0, -window.innerWidth, 0, 5),
+                y: this.lerpCoordinates((window.innerHeight/2 - e.clientY), 0, -window.innerHeight, 0, 5)
+            };
+
+            root.style.setProperty('--boxShadowX', `${boxShadow.x}px`);
+            root.style.setProperty('--boxShadowY', `${boxShadow.y}px`);
         });
 
-        // sketch.createCanvas(sketch.windowWidth, sketch.windowHeight)
+        let disciplinesFilter = document.createElement('div');
+        disciplinesFilter.classList.add('filter','filter-disciplines');
+        disciplinesFilter.id        = 'filter-disciplines';
+        disciplinesFilter.innerText = '+';
 
-        // create definitive set of results,
-        let discplines = sketch.createDiv("+").position(40, 100).id('filter-disciplines')
-            .class('filters')
-            .mouseOver( function (){ showDisciplines(sketch, 30, 90) } )
+        document.body.appendChild(disciplinesFilter);
+
+        disciplinesFilter.addEventListener('mouseover', (event) => {
+            if (!document.getElementById('disciplines-container')) {
+                let disciplinesContainer = this.showDisciplines(30, 90);
+                event.target.appendChild(disciplinesContainer);
+
+                disciplinesContainer.addEventListener('click', (event) => {
+                    const isLi = event.target.nodeName === 'LI';
+                    if (!isLi) {
+                        return;
+                    }
+
+                    console.log(event.target);
+                    this.highlightEntities(event.target.innerText);
+                })
+            }
+        });
+
 
         this.surveyData.map((responseEntity) => {
-            const randX         = sketch.round(sketch.random(0, window.innerWidth));
-            const randY         = sketch.round(sketch.random(0, window.innerHeight)) + 100;
+            const randX         = Math.floor(Math.random() * window.innerWidth);
+            const randY         = Math.floor(Math.random() * window.innerHeight);
             const entityType    = responseEntity.responses.type.length ? responseEntity.responses.type[0].toString().toLowerCase().trim() : 'anonymous';
 
             this.typeCount[entityType]++;
@@ -54,16 +69,24 @@ export class CreativeCodingSurvey {
             clickableEntity.style.top       = `${randY + 100}px`;
 
             for (let entityDiscipline of responseEntity.responses.disciplines) {
-                console.log(responseEntity.responses,entityDiscipline)
+                // collect all unique disciplines in a designated array
+                if (this.allDisciplines.indexOf(entityDiscipline) === -1) {
+                    this.allDisciplines.push(entityDiscipline)
+                }
+                // decorate icon with a recognisable className
                 clickableEntity.classList.add(entityDiscipline.toLowerCase().replace(' ',''));
             }
-            clickableEntity.classList.add( `icon`, `icon-${entityType}`);
+            clickableEntity.classList.add( `entity-container`, `icon`, `icon-${entityType}`);
 
-            document.body.appendChild(clickableEntity)
+            document.body.appendChild(clickableEntity);
 
-            clickableEntity.addEventListener('mouseover', function (){
-                showDetails(sketch, responseEntity, randX-10, randY + 25) }
-            );
+            clickableEntity.addEventListener('mouseover', (event) => {
+                if (!document.getElementById('d_' + responseEntity.id)) {
+                    event.target.appendChild(
+                        this.showDetails(responseEntity, randX - 10, randY + 25)
+                    );
+                }
+            });
 
             // add an initial entity position, randomly relative to the current viewport
             this.canvasEntitites.push({
@@ -80,76 +103,69 @@ export class CreativeCodingSurvey {
         }
         const totalCountContainer = document.querySelector( `.menu li:first-of-type`);
         totalCountContainer.setAttribute('data-value', this.surveyData.length);
-
-        function showDetails(sketch, e, x, y) {
-            console.log(e.responses);
-            let elemId = 'd_' + e.id;
-            let show = sketch.createDiv().position(x, y).id(elemId)
-                .style("background", "white")
-                .style("border", "2px solid red")
-                .style("padding", "3px")
-                .html("<div style='padding:10px; font-size:75%;' onmouseleave='(function(){ let a = document.getElementById(\"" + elemId + "\"); a.remove(); })()'>"
-                    + "<div>" + replaceUndefined(e.responses.name) + "</div>"
-                    + "<div>" + replaceUndefined(e.responses.website) + "</div>"
-                    + "<div>" + replaceUndefined(e.responses.countryOfResidence) + "</div>"
-                    + "<div style='color: red'>" + ('disciplines' in e.responses ? e.responses.disciplines.join(' ') : '') + "</div>"
-                    + "<div style='color: green'>" + ('tools' in e.responses ? e.responses.tools.join(' ') : '') + "</div>"
-                    + "</div>"
-                    );
-            }
-
-        function showDisciplines(sketch, x, y) {
-                let show = sketch.createDiv().position(x, y).id('disciplines')
-                    .style("background", "white")
-                    .style("border", "2px solid red")
-                    .style("padding", "3px")
-                    .style("z-index", "2")
-                    .html("<div style='padding:10px; font-size:75%;' onmouseleave='(function(){ let a = document.getElementById(\"disciplines\"); a.remove(); })()'>"
-                        + "<div class='category' onclick='highlightEntities(\"Design\")'>Design</div>"
-                        + "<div class='category' onclick='highlightEntities(\"Art\")'>Art</div>"
-                        + "<div class='category' onclick='highlightEntities(\"Education\")'> Education</div>"
-                        + "<div class='category' onclick='highlightEntities(\"Music\")'>Music</div>"
-                        + "<div class='category' onclick='highlightEntities(\"Performance\")'>Performance</div>"
-                        + "<div class='category' onclick='highlightEntities(\"Science\")'>Science</div>"
-                        + "<div class='category' onclick='highlightEntities(\"Digital Culture\")'>Digital Culture</div>"
-                        + "<div class='category' onclick='highlightEntities(\"Live Coding\")'>Live Coding</div>"
-                        + "</div>"
-                        );
-                }
-
-        function replaceUndefined(s) {
-            return s === undefined ? 'anonymous' : s
-        }
-
     }
 
+    showDetails(entity, x, y) {
+        // console.log(entity.responses);
 
-    draw(sketch) {
-        sketch.background(255);
+        let entityDetails           = document.createElement('div');
+        entityDetails.id            = 'd_' + entity.id;
+        entityDetails.className     = 'entity-details';
+        entityDetails.innerHTML     = `
+            <div>${this.replaceUndefined(entity.responses.name)}</div>
+            <div>${this.replaceUndefined(entity.responses.website)}</div>
+            <div>${this.replaceUndefined(entity.responses.countryOfResidence)}</div>
+            <div class="entity-details__disciplines">${('disciplines' in entity.responses ? entity.responses.disciplines.join(' ') : '')}</div>
+            <div class="entity-details__tools">${('tools' in entity.responses ? entity.responses.tools.join(' ') : '')}</div>`;
 
-        this.canvasEntitites.map((canvasEntity) => {
-            canvasEntity.draw()
+        return entityDetails;
+    }
+
+    showDisciplines(x, y) {
+        let disciplinesContainer = document.createElement('ul');
+        disciplinesContainer.classList.add('disciplines-container');
+        disciplinesContainer.id         = 'disciplines-container';
+        disciplinesContainer.style.left = `${x}px`;
+        disciplinesContainer.style.top  = `${y}px`;
+
+        /** todo roll through the know list of disciplines here **/
+        disciplinesContainer.innerHTML  = `
+            <li>Design</li>
+            <li>Art</li>
+            <li>Education</li>
+            <li>Music</li>
+            <li>Performance</li>
+            <li>Science</li>
+            <li>Digital Culture</li>
+            <li>Live Coding</li>`;
+
+        return disciplinesContainer;
+    }
+
+    highlightEntities(s) {
+        let f = document.getElementById('filter-disciplines');
+        f.innerText = "+ " + s;
+        window.entities.map(i => {
+            let entity = document.getElementById(i.id);
+            entity.classList.toggle('entity-container--highlighted', (i.responses.disciplines.find(e => e === s) !== undefined));
         });
     }
 
-    windowResized(sketch) {
-        sketch.resizeCanvas(sketch.windowWidth, sketch.windowHeight);
-
-        /* todo: we should probably recalculate the entities positions here, relative to the new canvas dimensions */
+    replaceUndefined(s) {
+        return s === undefined ? 'anonymous' : s
     }
 
-    // resize icons
-    resizeIcons() {
-        for (let icon in this.iconSet) {
-            this.iconSet[icon].resize(20,20);
-        }
+    lerpCoordinates(mousePosition, boundingMin, boundingMax, lerpMin, lerpMax) {
+        return (mousePosition - boundingMin)/(boundingMax - boundingMin) * (lerpMax - lerpMin) + lerpMin;
+    }
+
+    windowResized() {
+        /* todo: we should probably recalculate the entities positions here, relative to the new canvas dimensions */
     }
 }
 
 
 
-
-const projectCanvas = new CreativeCodingSurvey();
 export default element => {
     console.log('Component mounted on', element);
 
@@ -160,23 +176,15 @@ export default element => {
     loadJSON(`${apiURI}/${apiEndpoint}`, (data) => {
         console.log('fresh live data', data);
         responseData = (!data.error) ? data.data : mockData;
-        initialiseSketch(responseData)
+        startInstance(responseData)
     }, (error) => {
         console.log('stale local data', mockData);
         responseData = mockData;
+        startInstance(responseData);
     });
 
 
-    const initialiseSketch = function(responseData) {
-        const thisSketch = ( sketch ) => {
-            sketch.setup = () => projectCanvas.setup(sketch, responseData);
-            sketch.draw = () => projectCanvas.draw(sketch);
-            sketch.windowResized = () => projectCanvas.windowResized(sketch);
-            sketch.disableFirendlyErrors = true;
-        };
-
-        new P5(thisSketch);
-        entities = responseData;
+    const startInstance = (responseData) => {
+        new CreativeCodingSurvey(element, responseData);
     }
-
 };
