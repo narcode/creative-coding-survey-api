@@ -15,11 +15,6 @@ body {
   font-family: 'Roboto Mono', monospace;
 }
 
-nav {
-  background:transparent;
-  padding: 0 15px;
-}
-
 a {
   color: black;
   text-decoration: none;
@@ -29,30 +24,38 @@ a {
   }
 }
 
-.menu {
-  align-items: flex-start;
-  flex-wrap: nowrap;
-  background: none;
+nav {
+  background:transparent;
+  padding: 0 15px;
 
-  li {
-    display: inline-flex;
+  ul {
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    background: none;
 
-    width: auto;
-    padding: 0.25rem 1rem;
+    li {
+      display: inline-flex;
 
-    position: relative;
-    order: 0;
+      width: auto;
+      padding: 0.25rem 1rem;
 
-    &:first-of-type:before,
-    a::before {
-      content: attr(data-value);
-      margin: 0 0.5rem;
+      position: relative;
+      order: 0;
+
+      &:first-of-type:before,
+      a::before {
+        content: attr(data-value);
+        margin: 0 0.5rem;
+      }
     }
   }
 }
 
 div,
 section {
+  &.buttons-container {
+    @import 'buttons.scss';
+  }
   &.disciplines-container,
   &.entity-details {
     padding: 3px;
