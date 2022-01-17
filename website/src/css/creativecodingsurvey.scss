@@ -42,6 +42,10 @@ nav {
       position: relative;
       order: 0;
 
+      background-repeat: no-repeat;
+      background-size: 16px;
+      background-position: left center;
+
       &:first-of-type:before,
       a::before {
         content: attr(data-value);
