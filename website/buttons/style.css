@@ -1,0 +1,96 @@
+
+html, body {
+    min-height: 100%;
+    max-height: 100%;
+}
+
+@font-face {
+  font-family: "Menlo";
+  src: url("/fonts/Menlo-Regular.ttf") format("truetype");
+}
+
+#buttons{
+	display: block;
+	/*max-width: 100vw;
+	max-height: 100vh;*/
+}
+
+.dis_button{
+	font-family: Menlo;
+	display: block;
+	position: absolute;
+	background-color: white;
+  	border-style: solid;
+  	border-color: #979797;
+  	border-radius: 50%;
+  	border-width: 0.2px;
+  	border-opacity: 0.7;
+  	color: black;
+  	padding: 8px 23px;
+  	text-align: center;
+  	text-decoration: none;
+  	font-size: 16px;
+  	box-shadow: 0px 0px 12px #86BCD8;
+  	margin: 4px 2px;
+}
+
+.dis_button:hover{
+	box-shadow: 0px 0px 30px #86BCD8;
+	cursor: pointer;
+}
+
+.dis_button:active{
+	box-shadow: inset 0px 0px 5px #86BCD8;
+	border-style: none;
+	color: #86BCD8;
+	cursor: pointer;
+}
+
+#design{
+	margin-left: 23%;
+	margin-top: 15%;
+}
+
+#art{
+	margin-left: 43%;
+	margin-top: 29%;
+}
+
+#research{
+	margin-left: 36%;
+	margin-top: 5%;
+}
+
+#eucation{
+	margin-left: 48%;
+	margin-top: 42%;
+}
+
+#music{
+	margin-left: 10%;
+	margin-top: 36%;
+}
+
+#performance{
+	margin-left: 75%;
+	margin-top: 10%;
+	
+}
+
+#science{
+	margin-left: 80%;
+	margin-top: 40%;
+}
+
+#live_coding{
+	margin-left: 60%;
+	margin-top: 23%;
+}
+
+#digital_culture{
+	margin-left: 13%;
+	margin-top: 22%;
+}
+
+
+
