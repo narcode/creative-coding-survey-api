@@ -32,6 +32,21 @@ export class CreativeCodingSurvey {
             root.style.setProperty('--boxShadowY', `${boxShadow.y}px`);
         });
 
+        // listen fro changes checkboxes
+        root.addEventListener("change", e => {
+            console.log(e)
+
+            if (e.target.checked) {
+                console.log(`select all entities with class ${e.target.id}`)
+                let allOfThese = document.querySelectorAll(`.${e.target.id}`);
+                allOfThese.forEach(entity => { entity.classList.add('selected') })
+            }
+            else {
+                let allOfThese = document.querySelectorAll(`.${e.target.id}`);
+                allOfThese.forEach(entity => { entity.classList.remove('selected') })
+            }
+        })
+
         let disciplinesFilter = document.createElement('div');
         disciplinesFilter.classList.add('filter','filter-disciplines');
         disciplinesFilter.id        = 'filter-disciplines';
@@ -129,6 +144,7 @@ export class CreativeCodingSurvey {
 // this creates a unique DOM entity from a surveyData row
 export class DOMEntity {
     constructor(responseEntity, instance) {
+        // console.log(responseEntity);
         const randX         = Math.floor(Math.random() * window.innerWidth);
         const randY         = Math.floor(Math.random() * window.innerHeight);
         const entityType    = responseEntity.responses.type.length ? responseEntity.responses.type[0].toString().toLowerCase().trim() : 'anonymous';
