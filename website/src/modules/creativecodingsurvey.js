@@ -34,11 +34,10 @@ export class CreativeCodingSurvey {
 
         // listen fro changes checkboxes
         root.addEventListener("change", e => {
-            console.log(e)
-
             if (e.target.checked) {
                 console.log(`select all entities with class ${e.target.id}`)
                 let allOfThese = document.querySelectorAll(`.${e.target.id}`);
+console.log(allOfThese); // this is the result set of entities we want to animate to 'huddle' together
                 allOfThese.forEach(entity => { entity.classList.add('selected') })
             }
             else {
