@@ -3,12 +3,70 @@ import { mockData } from '../data/surveyData.js';
 
 import '../css/creativecodingsurvey.scss';
 
+function randomAngle() {
+    return Math.random() * Math.PI * 2;
+}
+
+function randomInRange(low, high) {
+    return Math.random() * (high - low) + low;
+}
+
+function elipseRadiusAtAngle(angle, xRadius, yRadius) {
+    return (yRadius * xRadius) / Math.sqrt(yRadius ** 2 * Math.sin(angle) ** 2 + xRadius ** 2 * Math.cos(angle) ** 2);
+}
+
+function elipseAngleAtPoint(center, point) {
+    return Math.atan2(point.y - center.y, point.x - center.x);
+}
+
+function polarToCartesian(angle, radius, offset) {
+    return {
+      x: radius * Math.sin(angle) + offset.x,
+      y: radius * Math.cos(angle) + offset.y,
+    };
+}
+
+function distance(a, b) {
+    return Math.hypot(b.x - a.x, b.y - a.y);
+}
+
+const extraRadius = 30;
+const clearanceRadius = 40;
+
+function computeMovePositionInOrbit(center, xRadius, yRadius) {
+    const angle = randomAngle();
+    const extraDist = randomInRange(clearanceRadius, extraRadius);
+    const angleRadius = elipseRadiusAtAngle(angle, xRadius, yRadius);
+    return polarToCartesian(angle, angleRadius + extraDist, center);
+}
+
+function computeMovePositionOutOfOrbit(center, xRadius, yRadius, current) {
+    const angle = elipseAngleAtPoint(center, current);
+    const angleRadius = elipseRadiusAtAngle(angle, xRadius, yRadius);
+    const totalRadius = angleRadius + extraRadius + clearanceRadius;
+    const dist = distance(center, current);
+    if (totalRadius >= dist) {
+        const extraDist = (totalRadius - dist) * 1.5;
+        return polarToCartesian(angle, totalRadius + extraDist, center);
+    } else {
+        return null;
+    }
+}
+
+function computeMovePosition(center, xRadius, yRadius, selected, current) {
+    if (selected) {
+        return computeMovePositionInOrbit(center, xRadius, yRadius);
+    } else {
+        return computeMovePositionOutOfOrbit(center, xRadius, yRadius, current);
+    }
+}
+
 export class CreativeCodingSurvey {
     constructor(element, responseData) {
         // start by exposing the survey data to the DOM and window instance
         // values of the window entries will update along with the state
         this.surveyData         = window.entities = responseData;
-        this.domEntitites       = window.DOMEntities = [];
+        const domEntities = this.domEntitites       = window.DOMEntities = [];
 
         this.allDisciplines     = [];
         this.typeCount          = {
@@ -32,17 +90,27 @@ export class CreativeCodingSurvey {
             root.style.setProperty('--boxShadowY', `${boxShadow.y}px`);
         });
 
-        // listen fro changes checkboxes
+        // listen for changes checkboxes
         root.addEventListener("change", e => {
+            const rect = e.target.labels[0].getBoundingClientRect();
             if (e.target.checked) {
-                console.log(`select all entities with class ${e.target.id}`)
-                let allOfThese = document.querySelectorAll(`.${e.target.id}`);
-console.log(allOfThese); // this is the result set of entities we want to animate to 'huddle' together
-                allOfThese.forEach(entity => { entity.classList.add('selected') })
+                domEntities.forEach((entity) => {
+                    const point = computeMovePosition(
+                        {x: (rect.left + rect.right) / 2, y: (rect.top + rect.bottom) / 2},
+                        (rect.right - rect.left) / 2,
+                        (rect.bottom - rect.top) / 2,
+                        entity.hasClass(e.target.id),
+                        entity.originalPosition(),
+                    );
+                    if (point != null) {
+                        entity.moveTo(e.target.id, point);
+                    }
+                });
             }
             else {
-                let allOfThese = document.querySelectorAll(`.${e.target.id}`);
-                allOfThese.forEach(entity => { entity.classList.remove('selected') })
+                domEntities.forEach((entity) => {
+                    entity.resetPosition(e.target.id);
+                });
             }
         })
 
@@ -64,7 +132,6 @@ console.log(allOfThese); // this is the result set of entities we want to animat
                         return;
                     }
 
-                    console.log(event.target);
                     this.highlightEntities(event.target.innerText);
                 })
             }
@@ -146,15 +213,22 @@ export class DOMEntity {
         // console.log(responseEntity);
         const randX         = Math.floor(Math.random() * window.innerWidth);
         const randY         = Math.floor(Math.random() * window.innerHeight);
+        const top = randY + 100;
         const entityType    = responseEntity.responses.type.length ? responseEntity.responses.type[0].toString().toLowerCase().trim() : 'anonymous';
 
         instance.typeCount[entityType]++;
 
         let clickableEntity         = document.createElement('div');
         clickableEntity.id          = responseEntity.id;
-        clickableEntity.style.left  = `${randX}px`;
-        clickableEntity.style.top   = `${randY + 100}px`;
+
+        // Make the starting point of the jitter animation random
+        clickableEntity.style.animationDelay = `${Math.random() * -100}s`;
+
+        clickableEntity.style.left  = `${randX - 10}px`;
+        clickableEntity.style.top   = `${top - 10}px`;
+        clickableEntity.style.transition = "all 0.5s ease-in";
         clickableEntity.setAttribute(`data-type`, entityType);
+
 
         // collect all unique disciplines in a designated array
         for (let entityDiscipline of responseEntity.responses.disciplines) {
@@ -177,7 +251,42 @@ export class DOMEntity {
             }
         });
 
-        return clickableEntity;
+        this.responseEntity = responseEntity;
+        this.clickableEntity = clickableEntity;
+        this.positionStack = [{tag: "origin", point: {x: randX, y: top}}];
+    }
+
+    moveTo(tag, point) {
+        this.positionStack.push({tag, point});
+        this.moveToPosition();
+    }
+
+    moveToPosition() {
+        const {x, y} = this.position();
+        this.clickableEntity.style.left = `${x - 10}px`;
+        this.clickableEntity.style.top = `${y - 10}px`;
+    }
+
+    originalPosition() {
+        return this.positionStack[0].point;
+    }
+
+    position() {
+        return this.positionStack[this.positionStack.length - 1].point;
+    }
+
+    resetPosition(tagToReset) {
+        const index = this.positionStack.findIndex(({tag}) => tag === tagToReset);
+        if (index !== -1) {
+            this.positionStack.splice(index, 1);
+            if (index === this.positionStack.length) {
+                this.moveToPosition();
+            }
+        }
+    }
+
+    hasClass(class_) {
+        return this.clickableEntity.classList.contains(class_);
     }
 }
 
