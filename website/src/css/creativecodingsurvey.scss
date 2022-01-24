@@ -105,13 +105,14 @@ section {
 
   & > div {
     display: none;
-    width: 25vw;
+    width: auto;
     padding: 2rem 1rem 1rem;
 
     left: -8px;
     top: -8px;
-
+    
     font-size: var(--fontScale);
+    
   }
   &:hover {
     z-index: 10;
@@ -131,7 +132,7 @@ section {
 
   .entity-details {
     & > div:not(:last-of-type) {
-      margin-bottom: .5rem;
+      margin-bottom: var(--marginScale);
     }
     .entity-details__disciplines {
       color: red;

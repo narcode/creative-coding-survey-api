@@ -82,14 +82,20 @@ export class CreativeCodingSurvey {
         let root = document.documentElement;
         let viewport = window.visualViewport;
         
+        // for scaling the font and layout when zoomin in and out (pinching getsure on trackpad/mobile)
         viewport.addEventListener("resize", () => {
+            let marginScale = 0.5/viewport.scale
             let fontScale = 100/viewport.scale
             let ents = Array.from(document.querySelectorAll('.entity-container'));
+            let textdivs = Array.from(document.querySelectorAll('.entity-container .entity-details > div:not(:last-of-type)'));
             ents.forEach(ent => {
                 ent.style.setProperty('--fontScale', `${fontScale}%`);
             });
+            textdivs.forEach(tdiv => {
+                tdiv.style.setProperty('--marginScale', `${marginScale}em`);
+            });
         });
-        
+
         root.addEventListener("mousemove", e => {
             let boxShadow = {
                 x: this.lerpCoordinates((window.innerWidth/2 - e.clientX), 0, -window.innerWidth, 0, 5),
@@ -172,11 +178,11 @@ export class CreativeCodingSurvey {
             // entityDetails.id            = 'd_' + entity.id;
             entityDetails.className     = 'entity-details';
             entityDetails.innerHTML     = `
-            <div>${this.replaceUndefined(entity.responses.name)}</div>
-            <div>${this.replaceUndefined(entity.responses.website)}</div>
-            <div>${this.replaceUndefined(entity.responses.countryOfResidence)}</div>
-            <div class="entity-details__disciplines">${('disciplines' in entity.responses ? entity.responses.disciplines.join(' ') : '')}</div>
-            <div class="entity-details__tools">${('tools' in entity.responses ? entity.responses.tools.join(' ') : '')}</div>`;
+            <div class='details'>${this.replaceUndefined(entity.responses.name)}</div>
+            <div class='details'>${this.replaceUndefined(entity.responses.website)}</div>
+            <div class='details'>${this.replaceUndefined(entity.responses.countryOfResidence)}</div>
+            <div class="entity-details__disciplines details">${('disciplines' in entity.responses ? entity.responses.disciplines.join(' ') : '')}</div>
+            <div class="entity-details__tools details">${('tools' in entity.responses ? entity.responses.tools.join(' ') : '')}</div>`;
 
         return entityDetails;
     }
@@ -255,9 +261,9 @@ export class DOMEntity {
         // we're adding the entity details container once, on the first hover, after that css does the showing and the hiding
         clickableEntity.addEventListener('mouseover', (event) => {
             if (!clickableEntity.querySelector('.entity-details')) {
-                event.target.appendChild(
-                    instance.showEntityDetails(responseEntity, randX - 10, randY + 25)
-                );
+                let details = instance.showEntityDetails(responseEntity, randX - 10, randY + 25);
+                details.style.setProperty('--marginScale', `.5em`); // initialize values.
+                event.target.appendChild(details);
             }
         });
 
