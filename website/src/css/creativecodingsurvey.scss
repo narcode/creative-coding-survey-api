@@ -86,17 +86,29 @@ section {
 
   background-color: white;
 
-  &.filter-disciplines {
+  &.filter-keywords {
     left: 40px;
     top: 64px;
   }
 
-  & > .disciplines-container {
+  & > .filter-container {
     display: none;
     list-style: none;
   }
-  &:hover > .disciplines-container {
+  &:hover > .filter-container {
     display: block;
+    display: flex;
+    width: 500px;
+    flex-wrap: wrap;
+    font-size: 80%;
+    
+  }
+
+  & > .filter-container > span{
+    padding: 10px;
+    text-decoration: 1px solid #ff00005e underline;
+    line-height: 1.5em;
+    cursor: default;
   }
 }
 

@@ -69,6 +69,8 @@ export class CreativeCodingSurvey {
         const domEntities = this.domEntitites       = window.DOMEntities = [];
 
         this.allDisciplines     = [];
+        this.allKeywords        = [];
+        this.allTools           = [];
         this.typeCount          = {
             enthusiast: 0,
             maker: 0,
@@ -133,20 +135,21 @@ export class CreativeCodingSurvey {
             }
         })
 
-        let disciplinesFilter = document.createElement('div');
-        disciplinesFilter.classList.add('filter','filter-disciplines');
-        disciplinesFilter.id        = 'filter-disciplines';
-        disciplinesFilter.innerText = '+';
+        let keywordsFilter = document.createElement('div');
+        keywordsFilter.classList.add('filter','filter-keywords');
+        keywordsFilter.id        = 'filter-keywords';
+        keywordsFilter.innerText = '+';
 
-        document.body.appendChild(disciplinesFilter);
+        document.body.appendChild(keywordsFilter);
 
-        disciplinesFilter.addEventListener('mouseover', (event) => {
-            if (!document.getElementById('disciplines-container')) {
-                let disciplinesContainer = this.createDisciplinesFilter(30, 90);
-                event.target.appendChild(disciplinesContainer);
+        keywordsFilter.addEventListener('mouseover', (event) => {
+            if (!document.getElementById('keywords-container')) {
+                let keywordsContainer = this.createKeywordsFilter();
+                event.target.appendChild(keywordsContainer);
 
-                disciplinesContainer.addEventListener('click', (event) => {
-                    const isLi = event.target.nodeName === 'LI';
+                keywordsContainer.addEventListener('click', (event) => {
+                    const isLi = event.target.nodeName === 'SPAN';
+                    console.log(event.target.nodeName);
                     if (!isLi) {
                         return;
                     }
@@ -190,26 +193,24 @@ export class CreativeCodingSurvey {
         return entityDetails;
     }
 
-    createDisciplinesFilter(x, y) {
-        let disciplinesContainer = document.createElement('ul');
-            disciplinesContainer.classList.add('disciplines-container');
-            disciplinesContainer.id         = 'disciplines-container';
-            disciplinesContainer.style.left = `${x}px`; /** do we want get these coords from wihtin js? tho **/
-            disciplinesContainer.style.top  = `${y}px`;
+    createKeywordsFilter() {
+        let keywordsContainer = document.createElement('div');
+            keywordsContainer.classList.add('filter-container');
+            keywordsContainer.id         = 'keywords-container';
 
-        this.allDisciplines.map((discipline, i) => {
-            disciplinesContainer.insertAdjacentHTML('beforeend', `<li>${discipline}</li>`)
+        this.allKeywords.map((keyword, i) => {
+            keywordsContainer.insertAdjacentHTML('beforeend', `<span>${keyword}</span>`)
         });
 
-        return disciplinesContainer;
+        return keywordsContainer;
     }
 
     highlightEntities(s) {
-        let f = document.getElementById('filter-disciplines');
+        let f = document.getElementById('filter-keywords');
         f.innerText = "+ " + s;
         window.entities.map(i => {
             let entity = document.getElementById(i.id);
-            entity.classList.toggle('entity-container--highlighted', (i.responses.disciplines.find(e => e === s) !== undefined));
+            entity.classList.toggle('entity-container--highlighted', (i.responses.keywords.find(e => e === s) !== undefined));
         });
     }
 
@@ -248,6 +249,19 @@ export class DOMEntity {
         clickableEntity.style.transition = "all 0.5s ease-in";
         clickableEntity.setAttribute(`data-type`, entityType);
 
+        // collecting keywords for block filter highlighter
+        for (let keyword of responseEntity.responses.keywords) {
+            if (instance.allKeywords.indexOf(keyword) === -1) {
+                instance.allKeywords.push(keyword);
+            }
+        }
+        
+        // and tools
+        // for (let tool of responseEntity.responses.tools) {
+        //     if (instance.allTools.indexOf(tool) === -1) {
+        //         instance.allTools.push(tool);
+        //     }
+        // }
 
         // collect all unique disciplines in a designated array
         for (let entityDiscipline of responseEntity.responses.disciplines) {
