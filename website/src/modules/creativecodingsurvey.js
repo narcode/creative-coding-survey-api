@@ -108,13 +108,16 @@ export class CreativeCodingSurvey {
 
         // listen for changes checkboxes
         root.addEventListener("change", e => {
-            const rect = e.target.labels[0].getBoundingClientRect();
+            const label = e.target.labels[0];
+            const xRadius = label.offsetWidth / 2;
+            const yRadius = label.offsetHeight / 2;
+            const center = {x: label.offsetLeft + xRadius, y: label.offsetTop + yRadius};
             if (e.target.checked) {
                 domEntities.forEach((entity) => {
                     const point = computeMovePosition(
-                        {x: (rect.left + rect.right) / 2, y: (rect.top + rect.bottom) / 2},
-                        (rect.right - rect.left) / 2,
-                        (rect.bottom - rect.top) / 2,
+                        center,
+                        xRadius,
+                        yRadius,
                         entity.hasClass(e.target.id),
                         entity.originalPosition(),
                     );
