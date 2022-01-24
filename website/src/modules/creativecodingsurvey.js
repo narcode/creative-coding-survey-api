@@ -22,6 +22,16 @@ export class CreativeCodingSurvey {
         };
 
         let root = document.documentElement;
+        let viewport = window.visualViewport;
+        
+        viewport.addEventListener("resize", () => {
+            let fontScale = 100/viewport.scale
+            let ents = Array.from(document.querySelectorAll('.entity-container'));
+            ents.forEach(ent => {
+                ent.style.setProperty('--fontScale', `${fontScale}%`);
+            });
+        });
+        
         root.addEventListener("mousemove", e => {
             let boxShadow = {
                 x: this.lerpCoordinates((window.innerWidth/2 - e.clientX), 0, -window.innerWidth, 0, 5),

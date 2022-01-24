@@ -1,5 +1,9 @@
 @import 'icons.scss';
 
+html {
+  height:100%;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
@@ -8,11 +12,11 @@
 
 body {
   margin: 0;
-  overflow: hidden;
-
+  overflow: auto;
   position: relative;
-
   font-family: 'Roboto Mono', monospace;
+  width: 150%;
+  height: 150%;
 }
 
 a {
@@ -27,6 +31,7 @@ a {
 nav {
   background:transparent;
   padding: 0 15px;
+  position: fixed;
 
   ul {
     align-items: flex-start;
@@ -106,7 +111,7 @@ section {
     left: -8px;
     top: -8px;
 
-    font-size: 75%;
+    font-size: var(--fontScale);
   }
   &:hover {
     z-index: 10;
