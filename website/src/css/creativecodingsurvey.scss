@@ -1,5 +1,9 @@
 @import 'icons.scss';
 
+html {
+  height:100%;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
@@ -8,16 +12,11 @@
 
 body {
   margin: 0;
-  overflow: hidden;
-
+  overflow: auto;
   position: relative;
-
   font-family: 'Roboto Mono', monospace;
-}
-
-nav {
-  background:transparent;
-  padding: 0 15px;
+  width: 150%;
+  height: 150%;
 }
 
 a {
@@ -29,30 +28,43 @@ a {
   }
 }
 
-.menu {
-  align-items: flex-start;
-  flex-wrap: nowrap;
-  background: none;
+nav {
+  background:transparent;
+  padding: 0 15px;
+  position: fixed;
 
-  li {
-    display: inline-flex;
+  ul {
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    background: none;
 
-    width: auto;
-    padding: 0.25rem 1rem;
+    li {
+      display: inline-flex;
 
-    position: relative;
-    order: 0;
+      width: auto;
+      padding: 0.25rem 1rem;
 
-    &:first-of-type:before,
-    a::before {
-      content: attr(data-value);
-      margin: 0 0.5rem;
+      position: relative;
+      order: 0;
+
+      background-repeat: no-repeat;
+      background-size: 16px;
+      background-position: left center;
+
+      &:first-of-type:before,
+      a::before {
+        content: attr(data-value);
+        margin: 0 0.5rem;
+      }
     }
   }
 }
 
 div,
 section {
+  &.buttons-container {
+    @import 'buttons.scss';
+  }
   &.disciplines-container,
   &.entity-details {
     padding: 3px;
@@ -93,13 +105,14 @@ section {
 
   & > div {
     display: none;
-    width: 25vw;
+    width: auto;
     padding: 2rem 1rem 1rem;
 
     left: -8px;
     top: -8px;
-
-    font-size: 75%;
+    
+    font-size: var(--fontScale);
+    
   }
   &:hover {
     z-index: 10;
@@ -118,6 +131,9 @@ section {
   }
 
   .entity-details {
+    & > div:not(:last-of-type) {
+      margin-bottom: var(--marginScale);
+    }
     .entity-details__disciplines {
       color: red;
     }
