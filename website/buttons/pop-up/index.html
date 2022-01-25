@@ -1,0 +1,38 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <div class="overlay" id="overlay">
+      <div class="popup" onclick="hidepopup()">
+          <p>This is a Creative Coding Utrecht project funded by Creative Industries Fund NL.
+            <br><b>Backend and frontend</b> ~ Felipe Ignacio Noriega, Raphael Sousa Santos & Sietse van der Meer 
+            <br><b>Design and project management</b> ~ Avital Barkai
+          </p>
+      </div>
+    </div>
+    <div class="icon" onclick="showpopup()">
+      <img src ="info.svg"/>
+    </div>
+    
+
+<script type="text/javascript">
+  
+  function showpopup() {
+    var overlay = document.getElementById("overlay");
+    overlay.classList.add("show");
+}
+
+  function hidepopup() {
+    var overlay = document.getElementById("overlay");
+    overlay.classList.remove("show");
+}
+
+</script>
+  </body>
+
+
+
+</html>
+
