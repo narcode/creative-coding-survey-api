@@ -138,7 +138,7 @@ export class CreativeCodingSurvey {
         let keywordsFilter = document.createElement('div');
         keywordsFilter.classList.add('filter','filter-keywords');
         keywordsFilter.id        = 'filter-keywords';
-        keywordsFilter.innerText = '+';
+        keywordsFilter.innerHTML = '<div id="kfilter">+</div>';
 
         document.body.appendChild(keywordsFilter);
 
@@ -148,9 +148,9 @@ export class CreativeCodingSurvey {
                 event.target.appendChild(keywordsContainer);
 
                 keywordsContainer.addEventListener('click', (event) => {
-                    const isLi = event.target.nodeName === 'SPAN';
+                    const isSpan = event.target.nodeName === 'SPAN';
                     console.log(event.target.nodeName);
-                    if (!isLi) {
+                    if (!isSpan) {
                         return;
                     }
 
@@ -158,6 +158,14 @@ export class CreativeCodingSurvey {
                 })
             }
         });
+
+        // remove filters 
+        let filterelem = document.getElementById('kfilter');
+        filterelem.addEventListener('click', (event) => {
+            this.unhighlightEntities(event.target.innerText);
+            event.target.innerText = "+"
+        });
+
 
         // this is where we're creating entities
         this.surveyData.map((responseEntity) => {
@@ -206,8 +214,17 @@ export class CreativeCodingSurvey {
     }
 
     highlightEntities(s) {
-        let f = document.getElementById('filter-keywords');
-        f.innerText = "+ " + s;
+        let f = document.getElementById('kfilter');
+        f.innerText = `- ${s}`;
+        window.entities.map(i => {
+            let entity = document.getElementById(i.id);
+            entity.classList.toggle('entity-container--highlighted', (i.responses.keywords.find(e => e === s) !== undefined));
+        });
+    }
+
+    unhighlightEntities(s) {
+        let f = document.getElementById('kfilter');
+        f.innerText = "+";
         window.entities.map(i => {
             let entity = document.getElementById(i.id);
             entity.classList.toggle('entity-container--highlighted', (i.responses.keywords.find(e => e === s) !== undefined));
