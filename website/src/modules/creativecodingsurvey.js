@@ -83,7 +83,7 @@ export class CreativeCodingSurvey {
 
         let root = document.documentElement;
         let viewport = window.visualViewport;
-        
+
         // for scaling the font and layout when zoomin in and out (pinching getsure on trackpad/mobile)
         viewport.addEventListener("resize", () => {
             let marginScale = 0.5/viewport.scale
@@ -116,20 +116,27 @@ export class CreativeCodingSurvey {
             const center = {x: label.offsetLeft + xRadius, y: label.offsetTop + yRadius};
             if (e.target.checked) {
                 domEntities.forEach((entity) => {
+                    const selected = entity.hasClass(e.target.id);
                     const point = computeMovePosition(
                         center,
                         xRadius,
                         yRadius,
-                        entity.hasClass(e.target.id),
+                        selected,
                         entity.originalPosition(),
                     );
                     if (point != null) {
                         entity.moveTo(e.target.id, point);
+                        if (selected) {
+                            entity.markAsSelected();
+                        }
                     }
                 });
             }
             else {
                 domEntities.forEach((entity) => {
+                    if (entity.hasClass(e.target.id)) {
+                        entity.unmarkAsSelected();
+                    }
                     entity.resetPosition(e.target.id);
                 });
             }
@@ -304,6 +311,23 @@ export class DOMEntity {
         this.responseEntity = responseEntity;
         this.clickableEntity = clickableEntity;
         this.positionStack = [{tag: "origin", point: {x: randX, y: top}}];
+        this.selectedCount = 0;
+    }
+
+    markAsSelected() {
+        if (this.selectedCount == 0) {
+            this.clickableEntity.classList.add('selected');
+        }
+        this.selectedCount += 1;
+    }
+
+    unmarkAsSelected() {
+        if (this.selectedCount <= 1) {
+            this.clickableEntity.classList.remove('selected');
+        }
+        if (this.selectedCount > 0) {
+            this.selectedCount -= 1;
+        }
     }
 
     moveTo(tag, point) {
