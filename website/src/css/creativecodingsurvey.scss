@@ -19,6 +19,11 @@ body {
   height: 150%;
 }
 
+p {
+  color: black;
+  text-decoration: none;
+}
+
 a {
   color: black;
   text-decoration: none;
@@ -52,7 +57,8 @@ nav {
       background-position: left center;
 
       &:first-of-type:before,
-      a::before {
+      a::before,
+      p::before {
         content: attr(data-value);
         margin: 0 0.5rem;
       }
@@ -86,17 +92,42 @@ section {
 
   background-color: white;
 
-  &.filter-disciplines {
-    left: 40px;
-    top: 64px;
+  &#filter-keywords {
+    left: 80px;
+    top: 150px;
   }
 
-  & > .disciplines-container {
+  &#filter-tools {
+    left: 60px;
+    top: 100px;
+  }
+
+  & > .filter-container {
     display: none;
     list-style: none;
   }
-  &:hover > .disciplines-container {
+  &:hover > .filter-container {
     display: block;
+    display: flex;
+    width: 500px;
+    flex-wrap: wrap;
+    font-size: 80%;
+
+  }
+
+  & > .filter-container > span{
+    padding: 10px;
+    text-decoration: 1px solid #ff00005e underline;
+    line-height: 1.5em;
+    cursor: default;
+  }
+}
+
+#filter-tools{
+  border: 2px solid #2af366be;
+
+  & > .filter-container > span {
+    text-decoration: 1px solid #2af366be;
   }
 }
 
@@ -110,9 +141,9 @@ section {
 
     left: -8px;
     top: -8px;
-    
+
     font-size: var(--fontScale);
-    
+
   }
   &:hover {
     z-index: 10;
@@ -127,7 +158,7 @@ section {
 
   &--highlighted {
     border-radius: 50%;
-    box-shadow: var(--boxShadowX) var(--boxShadowY) 10px 2px #ff0000;
+    box-shadow: var(--boxShadowX) var(--boxShadowY) 10px 2px var(--highlightedK), var(--boxShadowY) var(--boxShadowX) 15px 5px var(--highlightedT);
   }
 
   .entity-details {
