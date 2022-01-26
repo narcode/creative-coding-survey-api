@@ -69,8 +69,7 @@ export class CreativeCodingSurvey {
         const domEntities = this.domEntitites       = window.DOMEntities = [];
 
         this.allDisciplines     = [];
-        this.allKeywords        = [];
-        this.allTools           = [];
+        this.allFilters        = { "keywords": [], "tools": [] };
         this.typeCount          = {
             enthusiast: 0,
             maker: 0,
@@ -135,36 +134,94 @@ export class CreativeCodingSurvey {
             }
         })
 
-        let keywordsFilter = document.createElement('div');
-        keywordsFilter.classList.add('filter','filter-keywords');
-        keywordsFilter.id        = 'filter-keywords';
-        keywordsFilter.innerHTML = '<div id="kfilter">+</div>';
+        // 2 filters.
+        for (const t in this.allFilters) {
+            let divFilter = document.createElement('div');
+            divFilter.classList.add('filter');
+            divFilter.id        = `filter-${t}`;
+            divFilter.innerHTML = `<div id='${t}filter'>+</div>`;
 
-        document.body.appendChild(keywordsFilter);
+            document.body.appendChild(divFilter);
+            
+            divFilter.addEventListener('mouseover', (event) => {
+                if (!document.getElementById(`${t}-container`)) {
+                    let optionsContainer = this.createFilterContainer(t);
+                    event.target.appendChild(optionsContainer);
+    
+                    optionsContainer.addEventListener('click', (event) => {
+                        const isSpan = event.target.nodeName === 'SPAN';
+                        console.log(event.target.nodeName);
+                        if (!isSpan) {
+                            return;
+                        }
+    
+                        this.highlightEntities(t, event.target.innerText);
+                    })
+                }
+            }); 
 
-        keywordsFilter.addEventListener('mouseover', (event) => {
-            if (!document.getElementById('keywords-container')) {
-                let keywordsContainer = this.createKeywordsFilter();
-                event.target.appendChild(keywordsContainer);
+           //remove filters 
+            let filterelem = document.getElementById(`${t}filter`);
+            filterelem.addEventListener('click', (event) => {
+                this.unhighlightEntities(t, event.target.innerText);
+                event.target.innerText = "+"
+            });
 
-                keywordsContainer.addEventListener('click', (event) => {
-                    const isSpan = event.target.nodeName === 'SPAN';
-                    console.log(event.target.nodeName);
-                    if (!isSpan) {
-                        return;
-                    }
+        }
+        // let keywordsFilter = document.createElement('div');
+        // keywordsFilter.classList.add('filter');
+        // keywordsFilter.id        = 'filter-keywords';
+        // keywordsFilter.innerHTML = '<div id="kfilter">+</div>';
 
-                    this.highlightEntities(event.target.innerText);
-                })
-            }
-        });
+        // let toolsFilter = document.createElement('div');
+        // toolsFilter.classList.add('filter', 'tools');
+        // toolsFilter.id        = 'filter-tools';
+        // toolsFilter.innerHTML = '<div id="tfilter">+</div>';
 
-        // remove filters 
-        let filterelem = document.getElementById('kfilter');
-        filterelem.addEventListener('click', (event) => {
-            this.unhighlightEntities(event.target.innerText);
-            event.target.innerText = "+"
-        });
+
+        // document.body.appendChild(keywordsFilter)
+        // document.body.appendChild(toolsFilter);
+
+        // keywordsFilter.addEventListener('mouseover', (event) => {
+        //     if (!document.getElementById('keywords-container')) {
+        //         let keywordsContainer = this.createFilterContainer('keywords');
+        //         event.target.appendChild(keywordsContainer);
+
+        //         keywordsContainer.addEventListener('click', (event) => {
+        //             const isSpan = event.target.nodeName === 'SPAN';
+        //             console.log(event.target.nodeName);
+        //             if (!isSpan) {
+        //                 return;
+        //             }
+
+        //             this.highlightEntities(event.target.innerText);
+        //         })
+        //     }
+        // }); 
+
+        // toolsFilter.addEventListener('mouseover', (event) => {
+        //     if (!document.getElementById('tools-container')) {
+        //         let toolsFilter = this.createKeywordsFilter();
+        //         event.target.appendChild(toolsFilter);
+
+        //         toolsFilter.addEventListener('click', (event) => {
+        //             const isSpan = event.target.nodeName === 'SPAN';
+        //             console.log(event.target.nodeName);
+        //             if (!isSpan) {
+        //                 return;
+        //             }
+
+        //             this.highlightEntities(event.target.innerText);
+        //         })
+        //     }
+        // });
+
+        // // remove filters 
+        // let filterelem = document.getElementById('kfilter');
+        // filterelem.addEventListener('click', (event) => {
+        //     this.unhighlightEntities(event.target.innerText);
+        //     event.target.innerText = "+"
+        // });
 
 
         // this is where we're creating entities
@@ -201,33 +258,49 @@ export class CreativeCodingSurvey {
         return entityDetails;
     }
 
-    createKeywordsFilter() {
-        let keywordsContainer = document.createElement('div');
-            keywordsContainer.classList.add('filter-container');
-            keywordsContainer.id         = 'keywords-container';
-
-        this.allKeywords.map((keyword, i) => {
-            keywordsContainer.insertAdjacentHTML('beforeend', `<span>${keyword}</span>`)
+    createFilterContainer(filtertype) {
+        let filterContainer = document.createElement('div');
+            filterContainer.classList.add('filter-container');
+            filterContainer.id         = `${filtertype}-container`;
+        this.allFilters[filtertype].map((f, i) => {
+            filterContainer.insertAdjacentHTML('beforeend', `<span>${f}</span>`)
         });
 
-        return keywordsContainer;
+        return filterContainer;
     }
 
-    highlightEntities(s) {
-        let f = document.getElementById('kfilter');
+    highlightEntities(filterype, s) {
+        let f = document.getElementById(`${filterype}filter`);
         f.innerText = `- ${s}`;
         window.entities.map(i => {
             let entity = document.getElementById(i.id);
-            entity.classList.toggle('entity-container--highlighted', (i.responses.keywords.find(e => e === s) !== undefined));
+            switch (filterype) {
+                case 'keywords':
+                    entity.classList.toggle('entity-container--highlighted', (i.responses.keywords.find(e => e === s) !== undefined));
+                    break;
+                case  'tools':
+                    entity.classList.toggle('entity-container--highlightedT', (i.responses.tools.find(e => e === s) !== undefined));
+                default:
+                    break;
+            }
         });
     }
 
-    unhighlightEntities(s) {
-        let f = document.getElementById('kfilter');
+    unhighlightEntities(filterype, s) {
+        let f = document.getElementById(`${filterype}filter`);
         f.innerText = "+";
         window.entities.map(i => {
             let entity = document.getElementById(i.id);
-            entity.classList.toggle('entity-container--highlighted', (i.responses.keywords.find(e => e === s) !== undefined));
+            switch (filterype) {
+                case 'keywords':
+                    entity.classList.toggle('entity-container--highlighted', (i.responses.keywords.find(e => e === s) !== undefined));
+                    break;
+                case  'tools':
+                    entity.classList.toggle('entity-container--highlightedT', (i.responses.tools.find(e => e === s) !== undefined));
+                default:
+                    break;
+            }
+            
         });
     }
 
@@ -252,6 +325,11 @@ export class DOMEntity {
         const randY         = Math.floor(Math.random() * window.innerHeight);
         const top = randY + 100;
         const entityType    = responseEntity.responses.type.length ? responseEntity.responses.type[0].toString().toLowerCase().trim() : 'anonymous';
+        
+        // some responses dont have tools so add the propoerty
+        if (!responseEntity.responses.hasOwnProperty('tools')) {
+            responseEntity.responses.tools = []
+        }
 
         instance.typeCount[entityType]++;
 
@@ -268,18 +346,17 @@ export class DOMEntity {
 
         // collecting keywords for block filter highlighter
         for (let keyword of responseEntity.responses.keywords) {
-            if (instance.allKeywords.indexOf(keyword) === -1) {
-                instance.allKeywords.push(keyword);
+            if (instance.allFilters['keywords'].indexOf(keyword) === -1) {
+                instance.allFilters['keywords'].push(keyword);
+            }
+        }
+
+        for (let tool of responseEntity.responses.tools) {
+            if (instance.allFilters['tools'].indexOf(tool) === -1) {
+                instance.allFilters['tools'].push(tool);
             }
         }
         
-        // and tools
-        // for (let tool of responseEntity.responses.tools) {
-        //     if (instance.allTools.indexOf(tool) === -1) {
-        //         instance.allTools.push(tool);
-        //     }
-        // }
-
         // collect all unique disciplines in a designated array
         for (let entityDiscipline of responseEntity.responses.disciplines) {
             if (instance.allDisciplines.indexOf(entityDiscipline) === -1) {
@@ -300,7 +377,7 @@ export class DOMEntity {
                 event.target.appendChild(details);
             }
         });
-
+        
         this.responseEntity = responseEntity;
         this.clickableEntity = clickableEntity;
         this.positionStack = [{tag: "origin", point: {x: randX, y: top}}];
