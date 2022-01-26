@@ -166,7 +166,7 @@ export class CreativeCodingSurvey {
             }
         });
 
-        // remove filters 
+        // remove filters
         let filterelem = document.getElementById('kfilter');
         filterelem.addEventListener('click', (event) => {
             this.unhighlightEntities(event.target.innerText);
@@ -189,7 +189,7 @@ export class CreativeCodingSurvey {
 
     updateTypeTotals() {
         for (const [type, count] of Object.entries(this.typeCount)) {
-            const typeContainer = document.querySelector( `.menu li.${type} a`);
+            const typeContainer = document.querySelector( `.menu li.${type} p`);
             typeContainer.setAttribute('data-value', count);
         }
     }
@@ -279,7 +279,7 @@ export class DOMEntity {
                 instance.allKeywords.push(keyword);
             }
         }
-        
+
         // and tools
         // for (let tool of responseEntity.responses.tools) {
         //     if (instance.allTools.indexOf(tool) === -1) {
