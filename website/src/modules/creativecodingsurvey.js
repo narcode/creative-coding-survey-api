@@ -115,30 +115,10 @@ export class CreativeCodingSurvey {
             const yRadius = label.offsetHeight / 2;
             const center = {x: label.offsetLeft + xRadius, y: label.offsetTop + yRadius};
             if (e.target.checked) {
-                domEntities.forEach((entity) => {
-                    const selected = entity.hasClass(e.target.id);
-                    const point = computeMovePosition(
-                        center,
-                        xRadius,
-                        yRadius,
-                        selected,
-                        entity.originalPosition(),
-                    );
-                    if (point != null) {
-                        entity.moveTo(e.target.id, point);
-                        if (selected) {
-                            entity.markAsSelected();
-                        }
-                    }
-                });
+                domEntities.forEach((entity) => entity.moveForSelectedDiscipline(e.target.id, center, xRadius, yRadius));
             }
             else {
-                domEntities.forEach((entity) => {
-                    if (entity.hasClass(e.target.id)) {
-                        entity.unmarkAsSelected();
-                    }
-                    entity.resetPosition(e.target.id);
-                });
+                domEntities.forEach((entity) => entity.resetPosition(e.target.id));
             }
         })
 
@@ -310,29 +290,32 @@ export class DOMEntity {
 
         this.responseEntity = responseEntity;
         this.clickableEntity = clickableEntity;
-        this.positionStack = [{tag: "origin", point: {x: randX, y: top}}];
-        this.selectedCount = 0;
+        this.taggedOriginalPosition = {tag: "origin", point: {x: randX, y: top}};
+        this.positionStack = [this.taggedOriginalPosition];
     }
 
-    markAsSelected() {
-        if (this.selectedCount == 0) {
+    unselectedMoveTo(tag, point) {
+        this.positionStack[0] = {tag, point};
+        this.moveToPosition();
+    }
+
+    selectedMoveTo(tag, point) {
+        if (this.positionStack.length === 1) {
             this.clickableEntity.classList.add('selected');
         }
-        this.selectedCount += 1;
-    }
-
-    unmarkAsSelected() {
-        if (this.selectedCount <= 1) {
-            this.clickableEntity.classList.remove('selected');
-        }
-        if (this.selectedCount > 0) {
-            this.selectedCount -= 1;
-        }
-    }
-
-    moveTo(tag, point) {
         this.positionStack.push({tag, point});
         this.moveToPosition();
+    }
+
+    moveForSelectedDiscipline(discipline, center, xRadius, yRadius) {
+        if (this.hasClass(discipline)) {
+            this.selectedMoveTo(discipline, computeMovePositionInOrbit(center, xRadius, yRadius));
+        } else {
+            const point = computeMovePositionOutOfOrbit(center, xRadius, yRadius, this.originalPosition());
+            if (point != null) {
+                this.unselectedMoveTo(discipline, point);
+            }
+        }
     }
 
     moveToPosition() {
@@ -342,7 +325,7 @@ export class DOMEntity {
     }
 
     originalPosition() {
-        return this.positionStack[0].point;
+        return this.taggedOriginalPosition.point;
     }
 
     position() {
@@ -351,10 +334,16 @@ export class DOMEntity {
 
     resetPosition(tagToReset) {
         const index = this.positionStack.findIndex(({tag}) => tag === tagToReset);
-        if (index !== -1) {
+        if (index === 0) {
+            this.positionStack[0] = this.taggedOriginalPosition;
+            this.moveToPosition();
+        } else if (index !== -1) {
             this.positionStack.splice(index, 1);
             if (index === this.positionStack.length) {
                 this.moveToPosition();
+            }
+            if (this.positionStack.length === 1) {
+                this.clickableEntity.classList.remove('selected');
             }
         }
     }
