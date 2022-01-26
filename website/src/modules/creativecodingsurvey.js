@@ -16,7 +16,7 @@ function elipseRadiusAtAngle(angle, xRadius, yRadius) {
 }
 
 function elipseAngleAtPoint(center, point) {
-    return Math.atan2(point.y - center.y, point.x - center.x);
+    return Math.atan2(point.x - center.x, point.y - center.y);
 }
 
 function polarToCartesian(angle, radius, offset) {
@@ -82,7 +82,7 @@ export class CreativeCodingSurvey {
 
         let root = document.documentElement;
         let viewport = window.visualViewport;
-        
+
         // for scaling the font and layout when zoomin in and out (pinching getsure on trackpad/mobile)
         viewport.addEventListener("resize", () => {
             let marginScale = 0.5/viewport.scale
@@ -114,23 +114,10 @@ export class CreativeCodingSurvey {
             const yRadius = label.offsetHeight / 2;
             const center = {x: label.offsetLeft + xRadius, y: label.offsetTop + yRadius};
             if (e.target.checked) {
-                domEntities.forEach((entity) => {
-                    const point = computeMovePosition(
-                        center,
-                        xRadius,
-                        yRadius,
-                        entity.hasClass(e.target.id),
-                        entity.originalPosition(),
-                    );
-                    if (point != null) {
-                        entity.moveTo(e.target.id, point);
-                    }
-                });
+                domEntities.forEach((entity) => entity.moveForSelectedDiscipline(e.target.id, center, xRadius, yRadius));
             }
             else {
-                domEntities.forEach((entity) => {
-                    entity.resetPosition(e.target.id);
-                });
+                domEntities.forEach((entity) => entity.resetPosition(e.target.id));
             }
         })
 
@@ -168,62 +155,7 @@ export class CreativeCodingSurvey {
             });
 
         }
-        // let keywordsFilter = document.createElement('div');
-        // keywordsFilter.classList.add('filter');
-        // keywordsFilter.id        = 'filter-keywords';
-        // keywordsFilter.innerHTML = '<div id="kfilter">+</div>';
-
-        // let toolsFilter = document.createElement('div');
-        // toolsFilter.classList.add('filter', 'tools');
-        // toolsFilter.id        = 'filter-tools';
-        // toolsFilter.innerHTML = '<div id="tfilter">+</div>';
-
-
-        // document.body.appendChild(keywordsFilter)
-        // document.body.appendChild(toolsFilter);
-
-        // keywordsFilter.addEventListener('mouseover', (event) => {
-        //     if (!document.getElementById('keywords-container')) {
-        //         let keywordsContainer = this.createFilterContainer('keywords');
-        //         event.target.appendChild(keywordsContainer);
-
-        //         keywordsContainer.addEventListener('click', (event) => {
-        //             const isSpan = event.target.nodeName === 'SPAN';
-        //             console.log(event.target.nodeName);
-        //             if (!isSpan) {
-        //                 return;
-        //             }
-
-        //             this.highlightEntities(event.target.innerText);
-        //         })
-        //     }
-        // }); 
-
-        // toolsFilter.addEventListener('mouseover', (event) => {
-        //     if (!document.getElementById('tools-container')) {
-        //         let toolsFilter = this.createKeywordsFilter();
-        //         event.target.appendChild(toolsFilter);
-
-        //         toolsFilter.addEventListener('click', (event) => {
-        //             const isSpan = event.target.nodeName === 'SPAN';
-        //             console.log(event.target.nodeName);
-        //             if (!isSpan) {
-        //                 return;
-        //             }
-
-        //             this.highlightEntities(event.target.innerText);
-        //         })
-        //     }
-        // });
-
-        // // remove filters 
-        // let filterelem = document.getElementById('kfilter');
-        // filterelem.addEventListener('click', (event) => {
-        //     this.unhighlightEntities(event.target.innerText);
-        //     event.target.innerText = "+"
-        // });
-
-
+        
         // this is where we're creating entities
         this.surveyData.map((responseEntity) => {
             DOMEntities.push(new DOMEntity(responseEntity, this));
@@ -239,7 +171,7 @@ export class CreativeCodingSurvey {
 
     updateTypeTotals() {
         for (const [type, count] of Object.entries(this.typeCount)) {
-            const typeContainer = document.querySelector( `.menu li.${type} a`);
+            const typeContainer = document.querySelector( `.menu li.${type} p`);
             typeContainer.setAttribute('data-value', count);
         }
     }
@@ -380,12 +312,32 @@ export class DOMEntity {
         
         this.responseEntity = responseEntity;
         this.clickableEntity = clickableEntity;
-        this.positionStack = [{tag: "origin", point: {x: randX, y: top}}];
+        this.taggedOriginalPosition = {tag: "origin", point: {x: randX, y: top}};
+        this.positionStack = [this.taggedOriginalPosition];
     }
 
-    moveTo(tag, point) {
+    unselectedMoveTo(tag, point) {
+        this.positionStack[0] = {tag, point};
+        this.moveToPosition();
+    }
+
+    selectedMoveTo(tag, point) {
+        if (this.positionStack.length === 1) {
+            this.clickableEntity.classList.add('selected');
+        }
         this.positionStack.push({tag, point});
         this.moveToPosition();
+    }
+
+    moveForSelectedDiscipline(discipline, center, xRadius, yRadius) {
+        if (this.hasClass(discipline)) {
+            this.selectedMoveTo(discipline, computeMovePositionInOrbit(center, xRadius, yRadius));
+        } else {
+            const point = computeMovePositionOutOfOrbit(center, xRadius, yRadius, this.originalPosition());
+            if (point != null) {
+                this.unselectedMoveTo(discipline, point);
+            }
+        }
     }
 
     moveToPosition() {
@@ -395,7 +347,7 @@ export class DOMEntity {
     }
 
     originalPosition() {
-        return this.positionStack[0].point;
+        return this.taggedOriginalPosition.point;
     }
 
     position() {
@@ -404,10 +356,16 @@ export class DOMEntity {
 
     resetPosition(tagToReset) {
         const index = this.positionStack.findIndex(({tag}) => tag === tagToReset);
-        if (index !== -1) {
+        if (index === 0) {
+            this.positionStack[0] = this.taggedOriginalPosition;
+            this.moveToPosition();
+        } else if (index !== -1) {
             this.positionStack.splice(index, 1);
             if (index === this.positionStack.length) {
                 this.moveToPosition();
+            }
+            if (this.positionStack.length === 1) {
+                this.clickableEntity.classList.remove('selected');
             }
         }
     }
