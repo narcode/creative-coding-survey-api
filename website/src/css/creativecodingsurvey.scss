@@ -158,12 +158,7 @@ section {
 
   &--highlighted {
     border-radius: 50%;
-    box-shadow: var(--boxShadowX) var(--boxShadowY) 10px 2px #ff000057;
-  }
-
-  &--highlightedT {
-    border-radius: 50%;
-    box-shadow: var(--boxShadowX) var(--boxShadowY) 10px 2px #2af36667;
+    box-shadow: var(--boxShadowX) var(--boxShadowY) 10px 2px var(--highlightedK), var(--boxShadowY) var(--boxShadowX) 15px 5px var(--highlightedT);
   }
 
   .entity-details {

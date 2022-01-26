@@ -137,7 +137,6 @@ export class CreativeCodingSurvey {
     
                     optionsContainer.addEventListener('click', (event) => {
                         const isSpan = event.target.nodeName === 'SPAN';
-                        console.log(event.target.nodeName);
                         if (!isSpan) {
                             return;
                         }
@@ -204,17 +203,37 @@ export class CreativeCodingSurvey {
     highlightEntities(filterype, s) {
         let f = document.getElementById(`${filterype}filter`);
         f.innerText = `- ${s}`;
+        let k = document.getElementById(`keywordsfilter`);
+        let t = document.getElementById(`toolsfilter`);
+        let getK = k.innerText.match(/\w+/);
+        let getT = t.innerText.match(/\w+/);
+        let keyword = getK != null ? getK[0] : ""
+        let tool = getT != null ? getT[0] : ""
+
         window.entities.map(i => {
             let entity = document.getElementById(i.id);
-            switch (filterype) {
-                case 'keywords':
-                    entity.classList.toggle('entity-container--highlighted', (i.responses.keywords.find(e => e === s) !== undefined));
-                    break;
-                case  'tools':
-                    entity.classList.toggle('entity-container--highlightedT', (i.responses.tools.find(e => e === s) !== undefined));
-                default:
-                    break;
+            let shadowColorK = 'transparent';
+            let shadowColorT = 'transparent';
+            
+            // keywords
+            let entityMatchesK = (i.responses.keywords.find(e => e === keyword) !== undefined)
+            if (entityMatchesK) {
+                shadowColorK = '#ff0000c7';
+            } 
+            // tools
+            let entityMatchesT = (i.responses.tools.find(e => e === tool) !== undefined)
+            if (entityMatchesT) {
+                shadowColorT = '#2af366be'
             }
+             
+            if (entityMatchesT || entityMatchesK) {
+                entity.classList.add('entity-container--highlighted');              
+            } else {
+                entity.classList.remove('entity-container--highlighted');
+            }
+
+            entity.style.setProperty('--highlightedT', `${shadowColorT}`);
+            entity.style.setProperty('--highlightedK', `${shadowColorK}`);
         });
     }
 
