@@ -16,7 +16,7 @@ function elipseRadiusAtAngle(angle, xRadius, yRadius) {
 }
 
 function elipseAngleAtPoint(center, point) {
-    return Math.atan2(point.y - center.y, point.x - center.x);
+    return Math.atan2(point.x - center.x, point.y - center.y);
 }
 
 function polarToCartesian(angle, radius, offset) {
