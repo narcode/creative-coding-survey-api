@@ -205,10 +205,11 @@ export class CreativeCodingSurvey {
         f.innerText = `- ${s}`;
         let k = document.getElementById(`keywordsfilter`);
         let t = document.getElementById(`toolsfilter`);
-        let getK = k.innerText.match(/\w+/);
-        let getT = t.innerText.match(/\w+/);
-        let keyword = getK != null ? getK[0] : ""
-        let tool = getT != null ? getT[0] : ""
+        let getK = k.innerText.replace('- ', '');
+        let getT = t.innerText.replace('- ', '');
+        console.log(getK, getT);
+        let keyword = getK;
+        let tool = getT;
 
         window.entities.map(i => {
             let entity = document.getElementById(i.id);
