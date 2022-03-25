@@ -276,7 +276,7 @@ export class DOMEntity {
         const randX         = Math.floor(Math.random() * window.innerWidth);
         const randY         = Math.floor(Math.random() * window.innerHeight);
         const top = randY + 100;
-        const entityType    = responseEntity.responses.type.length ? responseEntity.responses.type[0].toString().toLowerCase().trim() : 'anonymous';
+        const entityType    = responseEntity.responses.type && responseEntity.responses.type.length ? responseEntity.responses.type[0].toString().toLowerCase().trim() : 'anonymous';
         
         // some responses dont have tools so add the propoerty
         if (!responseEntity.responses.hasOwnProperty('tools')) {
