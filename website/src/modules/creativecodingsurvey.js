@@ -188,7 +188,7 @@ export class CreativeCodingSurvey {
         colophonEntity.innerHTML = `<div class='colophon-details'>
             This project is a work in process of mapping the creative coding community around the world.
             We are offering a way to explore and investigate, and also add yourself as an entity by answering the following survey:
-            </a href='https://mapping.creativecodingutrecht.nl/' target='_blank'>https://mapping.creativecodingutrecht.nl/</a>
+            <a href='https://mapping.creativecodingutrecht.nl/' target='_blank'>https://mapping.creativecodingutrecht.nl/</a>
             </br></br>
             This is a collaboration between Creative Coding Utrecht and
             designer-researcher Avital Barkai, made possible by Creative Industries Fund NL.
@@ -206,7 +206,7 @@ export class CreativeCodingSurvey {
             entityDetails.className     = 'entity-details';
             entityDetails.innerHTML     = `
             <div class='details'>${this.replaceUndefined(entity.responses.name)}</div>
-            <div class='details'>${this.replaceUndefined(entity.responses.website)}</div>
+            <div class='details'>${this.makeWebsiteLink(entity.responses.website, true)}</div>
             <div class='details'>${this.replaceUndefined(entity.responses.countryOfResidence)}</div>
             <div class="entity-details__disciplines details">${('disciplines' in entity.responses ? entity.responses.disciplines.join(' ') : '')}</div>
             <div class="entity-details__tools details">${('tools' in entity.responses ? entity.responses.tools.join(' ') : '')}</div>`;
@@ -283,6 +283,18 @@ export class CreativeCodingSurvey {
 
     replaceUndefined(s) {
         return s === undefined ? 'anonymous' : s
+    }
+
+    makeWebsiteLink(s) {
+        if (s === undefined) {
+            return 'anonymous';
+        } else {
+            if (s.includes('http')) {
+                return "<a target='_blank' href='"+s+"'>"+s+"</a>";
+            } else {
+                return "<a target='_blank' href='https://"+s+"'>"+s+"</a>";
+            }
+        }  
     }
 
     lerpCoordinates(mousePosition, boundingMin, boundingMax, lerpMin, lerpMax) {
