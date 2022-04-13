@@ -155,6 +155,8 @@ export class CreativeCodingSurvey {
 
         }
         
+        this.makeColophon();
+
         // this is where we're creating entities
         this.surveyData.map((responseEntity) => {
             DOMEntities.push(new DOMEntity(responseEntity, this));
@@ -173,6 +175,29 @@ export class CreativeCodingSurvey {
             const typeContainer = document.querySelector( `.menu li.${type} p`);
             typeContainer.setAttribute('data-value', count);
         }
+    }
+
+    makeColophon() {
+        const randX         = Math.floor(Math.random() * window.innerWidth);
+        const randY         = Math.floor(Math.random() * window.innerHeight);
+        const top = randY + 100;
+
+        let colophonEntity         = document.createElement('div');
+        colophonEntity.style.left  = `${randX - 10}px`;
+        colophonEntity.style.top   = `${top - 10}px`;
+        colophonEntity.innerHTML = `<div class='colophon-details'>
+            This project is a work in process of mapping the creative coding community around the world.
+            We are offering a way to explore and investigate, and also add yourself as an entity by answering the following survey:
+            </a href='https://mapping.creativecodingutrecht.nl/' target='_blank'>https://mapping.creativecodingutrecht.nl/</a>
+            </br></br>
+            This is a collaboration between Creative Coding Utrecht and
+            designer-researcher Avital Barkai, made possible by Creative Industries Fund NL.
+            </br></br>
+            Development, backend and frontend by Felipe Ignacio Noriega, Raphael Sousa Santos and Sietse van der Meer.
+            </div>`;
+
+        colophonEntity.classList.add(`entity-container`,`colophon`, `icon`, `icon-colophon`);
+        document.body.appendChild(colophonEntity);
     }
 
     showEntityDetails(entity, x, y) {
@@ -393,7 +418,7 @@ export class DOMEntity {
     hasClass(class_) {
         return this.clickableEntity.classList.contains(class_);
     }
-}
+}    
 
 // this is the default method executed when the project is loaded from the template initialisation
 export default element => {
