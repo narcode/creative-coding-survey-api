@@ -182,9 +182,15 @@ export class CreativeCodingSurvey {
         const randY         = Math.floor(Math.random() * window.innerHeight);
         const top = randY + 100;
 
-        let colophonEntity         = document.createElement('div');
-        colophonEntity.style.left  = `${randX - 10}px`;
-        colophonEntity.style.top   = `${top - 10}px`;
+        let colophonEntity                  = document.createElement('div');
+        colophonEntity.style.animationDelay = `${Math.random() * -100}s`;
+        colophonEntity.style.transition     = "all 0.5s ease-in";
+        colophonEntity.style.left           = `${randX - 10}px`;
+        colophonEntity.style.top            = `${top - 10}px`;
+        colophonEntity.style.height         = `25px`;
+        colophonEntity.style.width          = `25px`;
+        colophonEntity.style.backgroundSize = `25px`;
+
         colophonEntity.innerHTML = `<div class='colophon-details'>
             This project is a work in process of mapping the creative coding community around the world.
             We are offering a way to explore and investigate, and also add yourself as an entity by answering the following survey:
