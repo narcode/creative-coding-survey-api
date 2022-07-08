@@ -198,14 +198,15 @@ export class CreativeCodingSurvey {
             We are offering a way to explore and investigate, and also add yourself as an entity by answering the following survey:
             <a href='https://mapping.creativecodingutrecht.nl/' target='_blank'>https://mapping.creativecodingutrecht.nl/</a>
             </br></br>
-            This is a collaboration between Creative Coding Utrecht and
-            designer-researcher Avital Barkai, made possible by Creative Industries Fund NL.
+            This is a collaboration between Creative Coding Utrecht and 
+            designer-researcher Avital Barkai, made possible by Creative Industries Fund NL and part of On-the-Fly, 
+            a project co-funded by the Creative Europe program of the European Union.
             </br></br>
             Development, backend and frontend by Felipe Ignacio Noriega, Raphael Sousa Santos and Sietse van der Meer.
             </br></br>
             <div style='display: flex; align-items: center; justify-content:'>
-            <div><img width="100%" src=${cceLogo}/></div>
-            <div style='width: 67%; padding-left: 30px'> <img width="50%" src=${sciLogo}/></div>
+            <div><img width="100%" src=${cceLogo}></img></div>
+            <div style='width: 67%; padding-left: 30px'> <img width="50%" src=${sciLogo}></img></div>
             </div>
             </div>`;
 
