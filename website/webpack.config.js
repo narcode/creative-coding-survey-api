@@ -28,7 +28,12 @@ module.exports = {
                     sourceMap: true
                 }
             }]
-        }]
+        },
+        {
+            test: /\.(png|gif)$/,
+            use: 'file-loader'
+        }
+        ]
     },
     plugins: [
         new HtmlWebpackPlugin({

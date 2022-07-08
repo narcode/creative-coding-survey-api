@@ -2,6 +2,8 @@ import { loadJSON } from '../utils/ajax.js';
 import { mockData } from '../data/surveyData.js';
 
 import '../css/creativecodingsurvey.scss';
+import cceLogo from '../logos/cce.png'
+import sciLogo from '../logos/sci.gif'
 
 function randomAngle() {
     return Math.random() * Math.PI * 2;
@@ -200,6 +202,11 @@ export class CreativeCodingSurvey {
             designer-researcher Avital Barkai, made possible by Creative Industries Fund NL.
             </br></br>
             Development, backend and frontend by Felipe Ignacio Noriega, Raphael Sousa Santos and Sietse van der Meer.
+            </br></br>
+            <div style='display: flex; align-items: center; justify-content:'>
+            <div><img width="100%" src=${cceLogo}/></div>
+            <div style='width: 67%; padding-left: 30px'> <img width="50%" src=${sciLogo}/></div>
+            </div>
             </div>`;
 
         colophonEntity.classList.add(`entity-container`,`colophon`, `icon`, `icon-colophon`);
