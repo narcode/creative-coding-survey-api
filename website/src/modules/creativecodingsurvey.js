@@ -71,7 +71,7 @@ export class CreativeCodingSurvey {
         const domEntities = this.domEntitites       = window.DOMEntities = [];
 
         this.allDisciplines     = [];
-        this.allFilters        = { "keywords": [], "tools": [], "countryOfResidence": [] };
+        this.allFilters        =  { "countryOfResidence": [], "tools": [], "keywords": [] };
         this.typeCount          = {
             enthusiast: 0,
             maker: 0,

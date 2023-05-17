@@ -85,23 +85,22 @@ section {
 
 .filter {
   padding: 3px;
-  border: 2px solid red;
 
   position: absolute;
   z-index: 1;
 
   background-color: white;
 
-  &#filter-tools {
+  &#filter-keywords {
     left: 60px;
     top: 100px;
   }
 
-  &#filter-keywords {
+  &#filter-tools {
     left: 60px;
     top: 150px;
   }
-  
+
   &#filter-countryOfResidence {
     left: 60px;
     top: 200px;
@@ -111,28 +110,36 @@ section {
     display: none;
     list-style: none;
   }
+
   &:hover > .filter-container {
     display: block;
     display: flex;
     width: 500px;
     flex-wrap: wrap;
     font-size: 80%;
-
   }
 
   & > .filter-container > span{
     padding: 10px;
-    text-decoration: 1px solid #ff00005e underline;
+    // text-decoration: 1px solid red underline;
     line-height: 1.5em;
     cursor: default;
   }
 }
 
+#filter-keywords {
+  border: 2px solid red;
+  
+  & > .filter-container > span {
+    text-decoration: 1px solid red underline;
+  }  
+}
+
 #filter-tools{
-  border: 2px solid #2af366be;
+  border: 2px solid green;
 
   & > .filter-container > span {
-    text-decoration: 1px solid #2af366be underline;
+    text-decoration: 1px solid green underline;
   }
 }
 
@@ -143,7 +150,6 @@ section {
     text-decoration: 1px solid gold underline;
   }
 }
-
 
 .entity-container {
   position: absolute;
