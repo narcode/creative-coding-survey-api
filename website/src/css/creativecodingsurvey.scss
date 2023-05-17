@@ -85,7 +85,6 @@ section {
 
 .filter {
   padding: 3px;
-  border: 2px solid red;
 
   position: absolute;
   z-index: 1;
@@ -93,41 +92,62 @@ section {
   background-color: white;
 
   &#filter-keywords {
-    left: 80px;
-    top: 150px;
+    left: 60px;
+    top: 100px;
   }
 
   &#filter-tools {
     left: 60px;
-    top: 100px;
+    top: 150px;
+  }
+
+  &#filter-countryOfResidence {
+    left: 60px;
+    top: 200px;
   }
 
   & > .filter-container {
     display: none;
     list-style: none;
   }
+
   &:hover > .filter-container {
     display: block;
     display: flex;
     width: 500px;
     flex-wrap: wrap;
     font-size: 80%;
-
   }
 
   & > .filter-container > span{
     padding: 10px;
-    text-decoration: 1px solid #ff00005e underline;
+    // text-decoration: 1px solid red underline;
     line-height: 1.5em;
     cursor: default;
   }
 }
 
+#filter-keywords {
+  border: 2px solid red;
+  
+  & > .filter-container > span {
+    text-decoration: 1px solid red underline;
+  }  
+}
+
 #filter-tools{
-  border: 2px solid #2af366be;
+  border: 2px solid green;
 
   & > .filter-container > span {
-    text-decoration: 1px solid #2af366be underline;
+    text-decoration: 1px solid green underline;
+  }
+}
+
+#filter-countryOfResidence{
+  border: 2px solid gold;
+
+  & > .filter-container > span {
+    text-decoration: 1px solid gold underline;
   }
 }
 
@@ -162,8 +182,8 @@ section {
 
   &--highlighted {
     border-radius: 50%;
-    box-shadow: var(--boxShadowX) var(--boxShadowY) 10px 2px var(--highlightedK), var(--boxShadowY) var(--boxShadowX) 15px 5px var(--highlightedT);
   }
+  box-shadow: var(--boxShadowX) var(--boxShadowY) 10px 2px var(--highlighted-keywords), var(--boxShadowY) var(--boxShadowX) 15px 5px var(--highlighted-tools), var(--boxShadowY) var(--boxShadowX) 20px 8px var(--highlighted-countryOfResidence);
 
   .entity-details {
     & > div:not(:last-of-type) {
@@ -174,6 +194,9 @@ section {
     }
     .entity-details__tools {
       color: green;
+    }
+    .entity-details__country {
+      color: gold;
     }
   }
 }
