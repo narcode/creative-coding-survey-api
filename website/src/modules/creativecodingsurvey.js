@@ -5,6 +5,26 @@ import '../css/creativecodingsurvey.scss';
 import cceLogo from '../logos/cce.png'
 import sciLogo from '../logos/sci.gif'
 
+function replaceUndefined(s) {
+    return s === undefined ? 'anonymous' : s
+}
+
+function makeWebsiteLink(s) {
+    if (s === undefined) {
+        return 'anonymous';
+    } else {
+        if (s.includes('http')) {
+            return "<a target='_blank' href='"+s+"'>"+s+"</a>";
+        } else {
+            return "<a target='_blank' href='https://"+s+"'>"+s+"</a>";
+        }
+    }
+}
+
+function randomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+
 function randomAngle() {
     return Math.random() * Math.PI * 2;
 }
@@ -68,7 +88,6 @@ export class CreativeCodingSurvey {
         // start by exposing the survey data to the DOM and window instance
         // values of the window entries will update along with the state
         this.surveyData         = window.entities = responseData;
-        const domEntities = this.domEntitites       = window.DOMEntities = [];
 
         this.allDisciplines     = [];
         this.allFilters        =  { "countryOfResidence": [], "tools": [], "keywords": [] };
@@ -111,16 +130,7 @@ export class CreativeCodingSurvey {
 
         // listen for changes checkboxes
         root.addEventListener("change", e => {
-            const label = e.target.labels[0];
-            const xRadius = label.offsetWidth / 2;
-            const yRadius = label.offsetHeight / 2;
-            const center = {x: label.offsetLeft + xRadius, y: label.offsetTop + yRadius};
-            if (e.target.checked) {
-                domEntities.forEach((entity) => entity.moveForSelectedDiscipline(e.target.id, center, xRadius, yRadius));
-            }
-            else {
-                domEntities.forEach((entity) => entity.resetPosition(e.target.id));
-            }
+            this.mainGrid.moveEntitiesForSelectedDiscipline(e.target);
         })
 
         // 3 filters.
@@ -131,36 +141,45 @@ export class CreativeCodingSurvey {
             divFilter.innerHTML = `<div id='${t}-filter'>+</div>`;
 
             document.body.appendChild(divFilter);
-            
+
             divFilter.addEventListener('mouseover', (event) => {
                 if (!document.getElementById(`${t}-container`)) {
                     let optionsContainer = this.createFilterContainer(t);
                     event.target.appendChild(optionsContainer);
-    
+
                     optionsContainer.addEventListener('click', (event) => {
                         const isSpan = event.target.nodeName === 'SPAN';
                         if (!isSpan) {
                             return;
                         }
-    
+
                         this.addFilter(t, event.target.innerText);
                     })
                 }
-            }); 
+            });
 
-            //remove filters 
+            //remove filters
             let filterelem = document.getElementById(`${t}-filter`);
             filterelem.addEventListener('click', (event) => {
                 this.clearFilter(t, event.target.innerText);
             });
-
         }
-        
+
         this.makeColophon();
 
-        // this is where we're creating entities
+        const topOffset = 100;
+        const cellSize = 20;
+        this.mainGrid = new Grid(
+            0,
+            topOffset,
+            window.innerWidth,
+            window.innerHeight - topOffset,
+            cellSize,
+        );
+
+        // this is where we're creating the dom entities
         this.surveyData.map((responseEntity) => {
-            DOMEntities.push(new DOMEntity(responseEntity, this));
+            this.processResponseEntity(responseEntity);
         });
 
         // update all type totals in top nav
@@ -169,6 +188,41 @@ export class CreativeCodingSurvey {
         // set total number of entities in top nav
         const totalCountContainer = document.querySelector( `.menu li:first-of-type`);
         totalCountContainer.setAttribute('data-value', this.surveyData.length);
+    }
+
+    processResponseEntity(responseEntity) {
+        const entityType    = responseEntity.responses.type && responseEntity.responses.type.length ? responseEntity.responses.type[0].toString().toLowerCase().trim() : 'anonymous';
+
+        responseEntity.entityType = entityType;
+
+        // TODO: MOVE TO BACKEND
+        // some responses dont have tools so add the propoerty
+        if (!responseEntity.responses.hasOwnProperty('tools')) {
+            responseEntity.responses.tools = []
+        }
+
+        this.typeCount[entityType]++;
+        // collecting keywords for block filter highlighter
+        for (let keyword of responseEntity.responses.keywords) {
+            if (this.allFilters['keywords'].indexOf(keyword) === -1) {
+                this.allFilters['keywords'].push(keyword);
+            }
+        }
+
+        for (let tool of responseEntity.responses.tools) {
+            if (this.allFilters['tools'].indexOf(tool) === -1) {
+                this.allFilters['tools'].push(tool);
+            }
+        }
+
+        // collect all unique disciplines in a designated array
+        for (let entityDiscipline of responseEntity.responses.disciplines) {
+            if (this.allDisciplines.indexOf(entityDiscipline) === -1) {
+                this.allDisciplines.push(entityDiscipline)
+            }
+        }
+
+        this.mainGrid.addEntity(responseEntity);
     }
 
     updateTypeTotals() {
@@ -197,8 +251,8 @@ export class CreativeCodingSurvey {
             We are offering a way to explore and investigate, and also add yourself as an entity by answering the following survey:
             <a href='https://mapping.creativecodingutrecht.nl/' target='_blank'>https://mapping.creativecodingutrecht.nl/</a>
             </br></br>
-            This is a collaboration between Creative Coding Utrecht and 
-            designer-researcher Avital Barkai, made possible by Creative Industries Fund NL and part of On-the-Fly, 
+            This is a collaboration between Creative Coding Utrecht and
+            designer-researcher Avital Barkai, made possible by Creative Industries Fund NL and part of On-the-Fly,
             a project co-funded by the Creative Europe program of the European Union.
             </br></br>
             Development, backend and frontend by Felipe Ignacio Noriega, Raphael Sousa Santos and Sietse van der Meer.
@@ -211,20 +265,6 @@ export class CreativeCodingSurvey {
 
         colophonEntity.classList.add(`entity-container`,`colophon`, `icon`, `icon-colophon`);
         document.body.appendChild(colophonEntity);
-    }
-
-    showEntityDetails(entity, x, y) {
-        let entityDetails           = document.createElement('div');
-            // entityDetails.id            = 'd_' + entity.id;
-            entityDetails.className     = 'entity-details';
-            entityDetails.innerHTML     = `
-            <div class='details'>${this.replaceUndefined(entity.responses.name)}</div>
-            <div class='details'>${this.makeWebsiteLink(entity.responses.website, true)}</div>
-            <div class='entity-details__country details'>${this.replaceUndefined(entity.responses.countryOfResidence)}</div>
-            <div class="entity-details__disciplines details">${('disciplines' in entity.responses ? entity.responses.disciplines.join(' ') : '')}</div>
-            <div class="entity-details__tools details">${('tools' in entity.responses ? entity.responses.tools.join(' ') : '')}</div>`;
-
-        return entityDetails;
     }
 
     createFilterContainer(filtertype) {
@@ -255,13 +295,13 @@ export class CreativeCodingSurvey {
             let shadowColorK = 'transparent';
             let shadowColorT = 'transparent';
             let shadowColorC = 'transparent';
-            
+
             // keywords
             let entityMatchesK = (i.responses.keywords.find(e => e === keyword) !== undefined)
             if (entityMatchesK) {
                 shadowColorK = '#ff0000c7';
-            } 
-            
+            }
+
             // tools
             let entityMatchesT = (i.responses.tools.find(e => e === tool) !== undefined)
             if (entityMatchesT) {
@@ -273,9 +313,9 @@ export class CreativeCodingSurvey {
             if (entityMatchesC) {
                 shadowColorC = 'gold'
             }
-             
+
             if (entityMatchesT || entityMatchesK || entityMatchesC) {
-                entity.classList.add('entity-container--highlighted');              
+                entity.classList.add('entity-container--highlighted');
             } else {
                 entity.classList.remove('entity-container--highlighted');
             }
@@ -298,22 +338,6 @@ export class CreativeCodingSurvey {
         this.decorateEntities();
     }
 
-    replaceUndefined(s) {
-        return s === undefined ? 'anonymous' : s
-    }
-
-    makeWebsiteLink(s) {
-        if (s === undefined) {
-            return 'anonymous';
-        } else {
-            if (s.includes('http')) {
-                return "<a target='_blank' href='"+s+"'>"+s+"</a>";
-            } else {
-                return "<a target='_blank' href='https://"+s+"'>"+s+"</a>";
-            }
-        }  
-    }
-
     lerpCoordinates(mousePosition, boundingMin, boundingMax, lerpMin, lerpMax) {
         return (mousePosition - boundingMin)/(boundingMax - boundingMin) * (lerpMax - lerpMin) + lerpMin;
     }
@@ -323,21 +347,70 @@ export class CreativeCodingSurvey {
     }
 }
 
+class Grid {
+    constructor(leftOffset, topOffset, width, height, cellSize) {
+        this.leftOffset = leftOffset;
+        this.topOffset = topOffset;
+        this.width = width;
+        this.height = height;
+        this.cellSize = cellSize;
+        this.occupied = {};
+        this.domEntities = []
+    }
+
+    addEntity(responseEntity) {
+        let [x, y] = this.randomPlacement();
+        let domEntity = new DOMEntity(responseEntity, this.translateX(x), this.translateY(y));
+        if (!(x in this.occupied)) {
+            this.occupied[x] = {};
+        }
+        this.occupied[x][y] = domEntity;
+        this.domEntities.push(domEntity);
+    }
+
+
+    randomPlacement() {
+        // There's a better way of doing this when we know in advance all the entities
+        let y = randomInt(this.height / this.cellSize);
+        let x = randomInt(this.width / this.cellSize);
+        while (this.isOccupied(x, y)) {
+            y = randomInt(this.height / this.cellSize);
+            x = randomInt(this.width / this.cellSize);
+        }
+        return [x, y];
+    }
+
+    isOccupied(x, y) {
+        return x in this.occupied && y in this.occupied[x];
+    }
+
+    translateX(x) {
+        return this.leftOffset + x * this.cellSize;
+    }
+
+    translateY(y) {
+        return this.topOffset + y * this.cellSize;
+    }
+
+    moveEntitiesForSelectedDiscipline(selected) {
+        const id = selected.id;
+        const label = selected.labels[0];
+        const xRadius = label.offsetWidth / 2;
+        const yRadius = label.offsetHeight / 2;
+        const center = {x: label.offsetLeft + xRadius, y: label.offsetTop + yRadius};
+        if (selected.checked) {
+            this.domEntities.forEach((entity) => entity.moveForSelectedDiscipline(id, center, xRadius, yRadius));
+        } else {
+            this.domEntities.forEach((entity) => entity.resetPosition(id));
+        }
+    }
+}
+
 // this creates a unique DOM entity from a surveyData row
 export class DOMEntity {
-    constructor(responseEntity, instance) {
+    constructor(responseEntity, randX, randY) {
         // console.log(responseEntity);
-        const randX         = Math.floor(Math.random() * window.innerWidth);
-        const randY         = Math.floor(Math.random() * window.innerHeight);
-        const top = randY + 100;
-        const entityType    = responseEntity.responses.type && responseEntity.responses.type.length ? responseEntity.responses.type[0].toString().toLowerCase().trim() : 'anonymous';
-        
-        // some responses dont have tools so add the property
-        if (!responseEntity.responses.hasOwnProperty('tools')) {
-            responseEntity.responses.tools = []
-        }
-
-        instance.typeCount[entityType]++;
+        const entityType    = responseEntity.entityType;
 
         let clickableEntity         = document.createElement('div');
         clickableEntity.id          = responseEntity.id;
@@ -346,33 +419,12 @@ export class DOMEntity {
         clickableEntity.style.animationDelay = `${Math.random() * -100}s`;
 
         clickableEntity.style.left  = `${randX - 10}px`;
-        clickableEntity.style.top   = `${top - 10}px`;
+        clickableEntity.style.top   = `${randY - 10}px`;
         clickableEntity.style.transition = "all 0.5s ease-in";
         clickableEntity.setAttribute(`data-type`, entityType);
 
-        // collecting keywords for block filter highlighter
-        for (let keyword of responseEntity.responses.keywords) {
-            if (instance.allFilters['keywords'].indexOf(keyword) === -1) {
-                instance.allFilters['keywords'].push(keyword);
-            }
-        }
-
-        for (let tool of responseEntity.responses.tools) {
-            if (instance.allFilters['tools'].indexOf(tool) === -1) {
-                instance.allFilters['tools'].push(tool);
-            }
-        }
-
-        const country = responseEntity.responses.countryOfResidence;
-        if (instance.allFilters['countryOfResidence'].indexOf(country) === -1) {
-            instance.allFilters['countryOfResidence'].push(country);
-        }
-
         // collect all unique disciplines in a designated array
         for (let entityDiscipline of responseEntity.responses.disciplines) {
-            if (instance.allDisciplines.indexOf(entityDiscipline) === -1) {
-                instance.allDisciplines.push(entityDiscipline)
-            }
             // decorate icon with a recognisable className
             clickableEntity.classList.add(entityDiscipline.toLowerCase().replace(' ',''));
         }
@@ -383,16 +435,31 @@ export class DOMEntity {
         // we're adding the entity details container once, on the first hover, after that css does the showing and the hiding
         clickableEntity.addEventListener('mouseover', (event) => {
             if (!clickableEntity.querySelector('.entity-details')) {
-                let details = instance.showEntityDetails(responseEntity, randX - 10, randY + 25);
+                let details = this.showEntityDetails();
                 details.style.setProperty('--marginScale', `.5em`); // initialize values.
                 event.target.appendChild(details);
             }
         });
-        
+
         this.responseEntity = responseEntity;
         this.clickableEntity = clickableEntity;
-        this.taggedOriginalPosition = {tag: "origin", point: {x: randX, y: top}};
+        this.taggedOriginalPosition = {tag: "origin", point: {x: randX, y: randY}};
         this.positionStack = [this.taggedOriginalPosition];
+    }
+
+    showEntityDetails() {
+        let entity = this.responseEntity;
+        let entityDetails           = document.createElement('div');
+            // entityDetails.id            = 'd_' + entity.id;
+            entityDetails.className     = 'entity-details';
+            entityDetails.innerHTML     = `
+            <div class='details'>${replaceUndefined(entity.responses.name)}</div>
+            <div class='details'>${makeWebsiteLink(entity.responses.website, true)}</div>
+            <div class='details'>${replaceUndefined(entity.responses.countryOfResidence)}</div>
+            <div class="entity-details__disciplines details">${('disciplines' in entity.responses ? entity.responses.disciplines.join(' ') : '')}</div>
+            <div class="entity-details__tools details">${('tools' in entity.responses ? entity.responses.tools.join(' ') : '')}</div>`;
+
+        return entityDetails;
     }
 
     unselectedMoveTo(tag, point) {
@@ -452,7 +519,7 @@ export class DOMEntity {
     hasClass(class_) {
         return this.clickableEntity.classList.contains(class_);
     }
-}    
+}
 
 // this is the default method executed when the project is loaded from the template initialisation
 export default element => {
