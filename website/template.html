@@ -8,6 +8,7 @@
 </head>
 <body>
     <div data-module="creativecodingsurvey">
+
         <nav>
             <ul class="menu">
                 <li style="color:red">Entities at Creative Coding Ecologies</li>
@@ -18,9 +19,17 @@
                 <li class="venue icon-venue"><p>Venues</p></li>
                 <li class="event icon-event"><p>Events</p></li>
                 <li class="anonymous icon-anonymous"><p>Anonymous</p></li>
+                <span class="blury-cover"></span>
             </ul>
+            <div id="connection-card">
+                <div class="card-header"></div>
+                <div id="card-entities-space" class="card-entities-space">
+                    <span class="entities-counting"></span>
+                </div>
+                <div class="card-tags-buttons"></div>
+            </div>
         </nav>
-        <section class="buttons-container">
+        <div class="buttons-container">
             <div>
                 <input type="checkbox" id="design">
                 <label for="design" class="design">Design</label>
@@ -57,8 +66,10 @@
                 <input type="checkbox" id="digitalculture">
                 <label for="digitalculture" class="digitalculture">Digital Culture</label>
             </div>
-        </section>
+        </div> 
     </div>
+
+
 </body>
 
 <script>
