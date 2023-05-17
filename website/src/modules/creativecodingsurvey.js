@@ -71,7 +71,7 @@ export class CreativeCodingSurvey {
         const domEntities = this.domEntitites       = window.DOMEntities = [];
 
         this.allDisciplines     = [];
-        this.allFilters        = { "keywords": [], "tools": [] };
+        this.allFilters        = { "keywords": [], "tools": [], "countryOfResidence": [] };
         this.typeCount          = {
             enthusiast: 0,
             maker: 0,
@@ -123,12 +123,12 @@ export class CreativeCodingSurvey {
             }
         })
 
-        // 2 filters.
+        // 3 filters.
         for (const t in this.allFilters) {
             let divFilter = document.createElement('div');
             divFilter.classList.add('filter');
             divFilter.id        = `filter-${t}`;
-            divFilter.innerHTML = `<div id='${t}filter'>+</div>`;
+            divFilter.innerHTML = `<div id='${t}-filter'>+</div>`;
 
             document.body.appendChild(divFilter);
             
@@ -149,10 +149,9 @@ export class CreativeCodingSurvey {
             }); 
 
            //remove filters 
-            let filterelem = document.getElementById(`${t}filter`);
+            let filterelem = document.getElementById(`${t}-filter`);
             filterelem.addEventListener('click', (event) => {
                 this.unhighlightEntities(t, event.target.innerText);
-                event.target.innerText = "+"
             });
 
         }
@@ -221,7 +220,7 @@ export class CreativeCodingSurvey {
             entityDetails.innerHTML     = `
             <div class='details'>${this.replaceUndefined(entity.responses.name)}</div>
             <div class='details'>${this.makeWebsiteLink(entity.responses.website, true)}</div>
-            <div class='details'>${this.replaceUndefined(entity.responses.countryOfResidence)}</div>
+            <div class='entity-details__country details'>${this.replaceUndefined(entity.responses.countryOfResidence)}</div>
             <div class="entity-details__disciplines details">${('disciplines' in entity.responses ? entity.responses.disciplines.join(' ') : '')}</div>
             <div class="entity-details__tools details">${('tools' in entity.responses ? entity.responses.tools.join(' ') : '')}</div>`;
 
@@ -239,59 +238,74 @@ export class CreativeCodingSurvey {
         return filterContainer;
     }
 
-    highlightEntities(filterype, s) {
-        let f = document.getElementById(`${filterype}filter`);
+    highlightEntities(filtertype, s) {
+        let f = document.getElementById(`${filtertype}-filter`);
         f.innerText = `- ${s}`;
-        let k = document.getElementById(`keywordsfilter`);
-        let t = document.getElementById(`toolsfilter`);
+        let k = document.getElementById(`keywords-filter`);
+        let t = document.getElementById(`tools-filter`);
+        let c = document.getElementById(`countryOfResidence-filter`);
         let getK = k.innerText.replace('- ', '');
         let getT = t.innerText.replace('- ', '');
-        console.log(getK, getT);
+        let getC = c.innerText.replace('- ', '');
+        console.log(getK, getT, getC);
         let keyword = getK;
         let tool = getT;
+        let country = getC;
 
         window.entities.map(i => {
             let entity = document.getElementById(i.id);
             let shadowColorK = 'transparent';
             let shadowColorT = 'transparent';
+            let shadowColorC = 'transparent';
             
             // keywords
             let entityMatchesK = (i.responses.keywords.find(e => e === keyword) !== undefined)
             if (entityMatchesK) {
                 shadowColorK = '#ff0000c7';
             } 
+            
             // tools
             let entityMatchesT = (i.responses.tools.find(e => e === tool) !== undefined)
             if (entityMatchesT) {
                 shadowColorT = '#2af366be'
             }
+
+            // countryOfResidence
+            let entityMatchesC = (i.responses.countryOfResidence === country)
+            if (entityMatchesC) {
+                shadowColorC = 'gold'
+            }
              
-            if (entityMatchesT || entityMatchesK) {
+            if (entityMatchesT || entityMatchesK || entityMatchesC) {
                 entity.classList.add('entity-container--highlighted');              
             } else {
                 entity.classList.remove('entity-container--highlighted');
             }
 
-            entity.style.setProperty('--highlightedT', `${shadowColorT}`);
-            entity.style.setProperty('--highlightedK', `${shadowColorK}`);
+            entity.style.setProperty('--highlighted-tools', `${shadowColorT}`);
+            entity.style.setProperty('--highlighted-keywords', `${shadowColorK}`);
+            entity.style.setProperty('--highlighted-countryOfResidence', `${shadowColorC}`);
         });
     }
 
-    unhighlightEntities(filterype, s) {
-        let f = document.getElementById(`${filterype}filter`);
+    unhighlightEntities(filtertype, s) {
+        let f = document.getElementById(`${filtertype}-filter`);
         f.innerText = "+";
+        
+        console.log("unhighlightEntities", filtertype)
         window.entities.map(i => {
             let entity = document.getElementById(i.id);
-            switch (filterype) {
-                case 'keywords':
-                    entity.classList.toggle('entity-container--highlighted', (i.responses.keywords.find(e => e === s) !== undefined));
-                    break;
-                case  'tools':
-                    entity.classList.toggle('entity-container--highlightedT', (i.responses.tools.find(e => e === s) !== undefined));
-                default:
-                    break;
-            }
-            
+            // switch (filtertype) {
+            //     case 'keywords':                
+            //         entity.classList.remove('entity-container--highlighted', (i.responses.keywords.find(e => e === s) !== undefined));
+            //         break;
+            //     case 'tools':
+            //         entity.classList.remove('entity-container--highlighted', (i.responses.tools.find(e => e === s) !== undefined));
+            //     case 'countryOfResidence':
+            //         entity.classList.remove('entity-container--highlighted', (i.responses.countryOfResidence === s));
+            //     default:
+            //         break;
+            // }            
         });
     }
 
@@ -329,7 +343,7 @@ export class DOMEntity {
         const top = randY + 100;
         const entityType    = responseEntity.responses.type && responseEntity.responses.type.length ? responseEntity.responses.type[0].toString().toLowerCase().trim() : 'anonymous';
         
-        // some responses dont have tools so add the propoerty
+        // some responses dont have tools so add the property
         if (!responseEntity.responses.hasOwnProperty('tools')) {
             responseEntity.responses.tools = []
         }
@@ -359,7 +373,12 @@ export class DOMEntity {
                 instance.allFilters['tools'].push(tool);
             }
         }
-        
+
+        const country = responseEntity.responses.countryOfResidence;
+        if (instance.allFilters['countryOfResidence'].indexOf(country) === -1) {
+            instance.allFilters['countryOfResidence'].push(country);
+        }
+
         // collect all unique disciplines in a designated array
         for (let entityDiscipline of responseEntity.responses.disciplines) {
             if (instance.allDisciplines.indexOf(entityDiscipline) === -1) {

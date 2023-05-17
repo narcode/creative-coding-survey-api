@@ -92,14 +92,19 @@ section {
 
   background-color: white;
 
-  &#filter-keywords {
-    left: 80px;
-    top: 150px;
-  }
-
   &#filter-tools {
     left: 60px;
     top: 100px;
+  }
+
+  &#filter-keywords {
+    left: 60px;
+    top: 150px;
+  }
+  
+  &#filter-countryOfResidence {
+    left: 60px;
+    top: 200px;
   }
 
   & > .filter-container {
@@ -130,6 +135,15 @@ section {
     text-decoration: 1px solid #2af366be underline;
   }
 }
+
+#filter-countryOfResidence{
+  border: 2px solid gold;
+
+  & > .filter-container > span {
+    text-decoration: 1px solid gold underline;
+  }
+}
+
 
 .entity-container {
   position: absolute;
@@ -162,8 +176,8 @@ section {
 
   &--highlighted {
     border-radius: 50%;
-    box-shadow: var(--boxShadowX) var(--boxShadowY) 10px 2px var(--highlightedK), var(--boxShadowY) var(--boxShadowX) 15px 5px var(--highlightedT);
   }
+  box-shadow: var(--boxShadowX) var(--boxShadowY) 10px 2px var(--highlighted-keywords), var(--boxShadowY) var(--boxShadowX) 15px 5px var(--highlighted-tools), var(--boxShadowY) var(--boxShadowX) 20px 8px var(--highlighted-countryOfResidence);
 
   .entity-details {
     & > div:not(:last-of-type) {
@@ -174,6 +188,9 @@ section {
     }
     .entity-details__tools {
       color: green;
+    }
+    .entity-details__country {
+      color: gold;
     }
   }
 }
