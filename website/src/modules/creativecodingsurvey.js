@@ -143,15 +143,15 @@ export class CreativeCodingSurvey {
                             return;
                         }
     
-                        this.highlightEntities(t, event.target.innerText);
+                        this.addFilter(t, event.target.innerText);
                     })
                 }
             }); 
 
-           //remove filters 
+            //remove filters 
             let filterelem = document.getElementById(`${t}-filter`);
             filterelem.addEventListener('click', (event) => {
-                this.unhighlightEntities(t, event.target.innerText);
+                this.clearFilter(t, event.target.innerText);
             });
 
         }
@@ -238,9 +238,7 @@ export class CreativeCodingSurvey {
         return filterContainer;
     }
 
-    highlightEntities(filtertype, s) {
-        let f = document.getElementById(`${filtertype}-filter`);
-        f.innerText = `- ${s}`;
+    decorateEntities() {
         let k = document.getElementById(`keywords-filter`);
         let t = document.getElementById(`tools-filter`);
         let c = document.getElementById(`countryOfResidence-filter`);
@@ -288,25 +286,16 @@ export class CreativeCodingSurvey {
         });
     }
 
-    unhighlightEntities(filtertype, s) {
+    addFilter(filtertype, s) {
         let f = document.getElementById(`${filtertype}-filter`);
-        f.innerText = "+";
-        
-        console.log("unhighlightEntities", filtertype)
-        window.entities.map(i => {
-            let entity = document.getElementById(i.id);
-            // switch (filtertype) {
-            //     case 'keywords':                
-            //         entity.classList.remove('entity-container--highlighted', (i.responses.keywords.find(e => e === s) !== undefined));
-            //         break;
-            //     case 'tools':
-            //         entity.classList.remove('entity-container--highlighted', (i.responses.tools.find(e => e === s) !== undefined));
-            //     case 'countryOfResidence':
-            //         entity.classList.remove('entity-container--highlighted', (i.responses.countryOfResidence === s));
-            //     default:
-            //         break;
-            // }            
-        });
+        f.innerText = `- ${s}`;
+        this.decorateEntities();
+    }
+
+    clearFilter(filtertype) {
+        let f = document.getElementById(`${filtertype}-filter`);
+        f.innerText = `+`;
+        this.decorateEntities();
     }
 
     replaceUndefined(s) {
