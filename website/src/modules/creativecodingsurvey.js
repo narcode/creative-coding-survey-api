@@ -52,7 +52,7 @@ function distance(a, b) {
     return Math.hypot(b.x - a.x, b.y - a.y);
 }
 
-const extraRadius = 30;
+const extraRadius = 100;
 const clearanceRadius = 40;
 
 function computeMovePositionInOrbit(center, xRadius, yRadius) {
@@ -68,7 +68,7 @@ function computeMovePositionOutOfOrbit(center, xRadius, yRadius, current) {
     const totalRadius = angleRadius + extraRadius + clearanceRadius;
     const dist = distance(center, current);
     if (totalRadius >= dist) {
-        const extraDist = (totalRadius - dist) * 1.5;
+        const extraDist = (totalRadius - dist) * (Math.random(5) + 1.5);
         return polarToCartesian(angle, totalRadius + extraDist, center);
     } else {
         return null;
@@ -353,13 +353,9 @@ class Grid {
     addEntity(responseEntity) {
         let [x, y] = this.randomPlacement();
         let domEntity = new DOMEntity(responseEntity, this.translateX(x), this.translateY(y));
-        if (!(x in this.occupied)) {
-            this.occupied[x] = {};
-        }
-        this.occupied[x][y] = domEntity;
+        this.addEntityToOccupied(x, y, domEntity);
         this.domEntities.push(domEntity);
     }
-
 
     randomPlacement() {
         // There's a better way of doing this when we know in advance all the entities
@@ -384,6 +380,14 @@ class Grid {
         return this.topOffset + y * this.cellSize;
     }
 
+    translateXBack(x) {
+        return Math.floor((x - this.leftOffset) / this.cellSize);
+    }
+
+    translateYBack(y) {
+        return Math.floor((y - this.topOffset) / this.cellSize);
+    }
+
     moveEntitiesForDiscipline(disciplineCheckbox) {
         const id = disciplineCheckbox.id;
         if (disciplineCheckbox.checked) {
@@ -397,12 +401,71 @@ class Grid {
         }
     }
 
+    randomPlacementInOrbit(center, xRadius, yRadius) {
+        let {x, y} = computeMovePositionInOrbit(center, xRadius, yRadius);
+        x = this.translateXBack(x);
+        y = this.translateYBack(y);
+        while (this.isOccupied(x, y)) {
+            let point = computeMovePositionInOrbit(center, xRadius, yRadius);
+            x = this.translateXBack(point.x);
+            y = this.translateYBack(point.y);
+        }
+        return {x, y};
+    }
+
+    randomPlacementOutOfOrbit(center, xRadius, yRadius, originalPosition) {
+        let point = computeMovePositionOutOfOrbit(center, xRadius, yRadius, originalPosition);
+        if (point == null) {
+            return null;
+        }
+        let x = this.translateXBack(point.x);
+        let y = this.translateYBack(point.y);
+        while (this.isOccupied(x, y)) {
+            point = computeMovePositionOutOfOrbit(center, xRadius, yRadius, originalPosition);
+            if (point == null) {
+                return null;
+            }
+            x = this.translateXBack(point.x);
+            y = this.translateYBack(point.y);
+        }
+        return {x, y};
+    }
+
     moveEntityForSelectedDiscipline(entity, disciplineId, center, xRadius, yRadius) {
-        entity.moveForSelectedDiscipline(disciplineId, center, xRadius, yRadius);
+        if (entity.hasClass(disciplineId)) {
+            this.removeEntityFromOccupied(entity);
+            let newPos = this.randomPlacementInOrbit(center, xRadius, yRadius);
+            this.addEntityToOccupied(newPos.x, newPos.y, entity);
+            newPos.x = this.translateX(newPos.x);
+            newPos.y = this.translateY(newPos.y);
+            entity.selectedMoveTo(disciplineId, newPos);
+        } else {
+            const point = this.randomPlacementOutOfOrbit(center, xRadius, yRadius, entity.originalPosition());
+            if (point != null) {
+                this.removeEntityFromOccupied(entity);
+                this.addEntityToOccupied(point.x, point.y, entity);
+                point.x = this.translateX(point.x);
+                point.y = this.translateY(point.y);
+                entity.unselectedMoveTo(disciplineId, point);
+            }
+        }
     }
 
     moveEntityForUnselectedDiscipline(entity, disciplineId) {
+        this.removeEntityFromOccupied(entity);
         entity.resetPosition(disciplineId);
+    }
+
+    removeEntityFromOccupied(entity) {
+        let pos = entity.position();
+        delete this.occupied[this.translateXBack(pos.x)][this.translateYBack(pos.y)];
+    }
+
+    addEntityToOccupied(x, y, entity) {
+        if (!(x in this.occupied)) {
+            this.occupied[x] = {};
+        }
+        this.occupied[x][y] = entity;
     }
 }
 
@@ -475,14 +538,6 @@ export class DOMEntity {
     }
 
     moveForSelectedDiscipline(discipline, center, xRadius, yRadius) {
-        if (this.hasClass(discipline)) {
-            this.selectedMoveTo(discipline, computeMovePositionInOrbit(center, xRadius, yRadius));
-        } else {
-            const point = computeMovePositionOutOfOrbit(center, xRadius, yRadius, this.originalPosition());
-            if (point != null) {
-                this.unselectedMoveTo(discipline, point);
-            }
-        }
     }
 
     moveToPosition() {
