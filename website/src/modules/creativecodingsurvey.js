@@ -75,14 +75,6 @@ function computeMovePositionOutOfOrbit(center, xRadius, yRadius, current) {
     }
 }
 
-function computeMovePosition(center, xRadius, yRadius, selected, current) {
-    if (selected) {
-        return computeMovePositionInOrbit(center, xRadius, yRadius);
-    } else {
-        return computeMovePositionOutOfOrbit(center, xRadius, yRadius, current);
-    }
-}
-
 export class CreativeCodingSurvey {
     constructor(element, responseData) {
         // start by exposing the survey data to the DOM and window instance
@@ -130,7 +122,7 @@ export class CreativeCodingSurvey {
 
         // listen for changes checkboxes
         root.addEventListener("change", e => {
-            this.mainGrid.moveEntitiesForSelectedDiscipline(e.target);
+            this.mainGrid.moveEntitiesForDiscipline(e.target);
         })
 
         // 3 filters.
@@ -392,17 +384,25 @@ class Grid {
         return this.topOffset + y * this.cellSize;
     }
 
-    moveEntitiesForSelectedDiscipline(selected) {
-        const id = selected.id;
-        const label = selected.labels[0];
-        const xRadius = label.offsetWidth / 2;
-        const yRadius = label.offsetHeight / 2;
-        const center = {x: label.offsetLeft + xRadius, y: label.offsetTop + yRadius};
-        if (selected.checked) {
-            this.domEntities.forEach((entity) => entity.moveForSelectedDiscipline(id, center, xRadius, yRadius));
+    moveEntitiesForDiscipline(disciplineCheckbox) {
+        const id = disciplineCheckbox.id;
+        if (disciplineCheckbox.checked) {
+            const label = disciplineCheckbox.labels[0];
+            const xRadius = label.offsetWidth / 2;
+            const yRadius = label.offsetHeight / 2;
+            const center = {x: label.offsetLeft + xRadius, y: label.offsetTop + yRadius};
+            this.domEntities.forEach((entity) => this.moveEntityForSelectedDiscipline(entity, id, center, xRadius, yRadius));
         } else {
-            this.domEntities.forEach((entity) => entity.resetPosition(id));
+            this.domEntities.forEach((entity) => this.moveEntityForUnselectedDiscipline(entity, id));
         }
+    }
+
+    moveEntityForSelectedDiscipline(entity, disciplineId, center, xRadius, yRadius) {
+        entity.moveForSelectedDiscipline(disciplineId, center, xRadius, yRadius);
+    }
+
+    moveEntityForUnselectedDiscipline(entity, disciplineId) {
+        entity.resetPosition(disciplineId);
     }
 }
 
@@ -418,8 +418,6 @@ export class DOMEntity {
         // Make the starting point of the jitter animation random
         clickableEntity.style.animationDelay = `${Math.random() * -100}s`;
 
-        clickableEntity.style.left  = `${randX - 10}px`;
-        clickableEntity.style.top   = `${randY - 10}px`;
         clickableEntity.style.transition = "all 0.5s ease-in";
         clickableEntity.setAttribute(`data-type`, entityType);
 
@@ -445,6 +443,7 @@ export class DOMEntity {
         this.clickableEntity = clickableEntity;
         this.taggedOriginalPosition = {tag: "origin", point: {x: randX, y: randY}};
         this.positionStack = [this.taggedOriginalPosition];
+        this.moveToPosition();
     }
 
     showEntityDetails() {
