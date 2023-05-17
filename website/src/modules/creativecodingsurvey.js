@@ -207,6 +207,11 @@ export class CreativeCodingSurvey {
             }
         }
 
+        const country = responseEntity.responses.countryOfResidence;
+        if (this.allFilters['countryOfResidence'].indexOf(country) === -1) {
+            this.allFilters['countryOfResidence'].push(country);
+        }
+
         // collect all unique disciplines in a designated array
         for (let entityDiscipline of responseEntity.responses.disciplines) {
             if (this.allDisciplines.indexOf(entityDiscipline) === -1) {
