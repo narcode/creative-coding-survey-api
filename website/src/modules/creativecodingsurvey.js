@@ -238,8 +238,8 @@ export class CreativeCodingSurvey {
         let header = document.getElementById("connection-card-header");
         let body = document.getElementById("connection-card-entities-space");
         header.innerHTML = `
-<span id='connection-card-header-value'>${value}</span>
-<span id='connection-card-header-field'>${topLabel}</span>
+<span id='connection-card-header-value' class='connection-card-header-${topLabel}'>${value}</span>
+<span id='connection-card-header-field'>entities</span>
 `;
 
         let bodyRectangle = body.getBoundingClientRect();
