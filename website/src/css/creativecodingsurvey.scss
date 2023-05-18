@@ -313,7 +313,7 @@ section {
   
   .dropdown-content {
     display: none;
-    background-color: white;
+    background-color: white !important;
   
     position: absolute;
     width: 200px;
