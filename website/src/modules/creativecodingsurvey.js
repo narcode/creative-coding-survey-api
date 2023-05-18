@@ -538,24 +538,11 @@ export class DOMEntity {
 
     showEntityDetails() {
         let entity = this.responseEntity;
-<<<<<<< HEAD
+
         let entityDetails = document.createElement('div');
         // entityDetails.id            = 'd_' + entity.id;
         entityDetails.className = 'entity-details';
         entityDetails.innerHTML = `
-=======
-
-        // let entity_tool_filters = 'tools' in entity.responses ? entity.responses.tools : [];
-        // const tool_filter = `<div>${entity_tool_filters.map().join()}</div>`
-
-
-        // console.log(tool_filter)
-
-        let entityDetails           = document.createElement('div');
-            // entityDetails.id            = 'd_' + entity.id;
-            entityDetails.className     = 'entity-details';
-            entityDetails.innerHTML     = `
->>>>>>> changes in the template and scss
             <div class='details'>${replaceUndefined(entity.responses.name)}</div>
             <div class='details'>${makeWebsiteLink(entity.responses.website, true)}</div>
             <div class='details'>${replaceUndefined(entity.responses.countryOfResidence)}</div>
