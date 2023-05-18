@@ -360,7 +360,6 @@ export class CreativeCodingSurvey {
 
                         let detailsRect = details.getBoundingClientRect();
                         let parentRect = document.body.getBoundingClientRect();
-                        console.log(detailsRect, parentRect)
                         let rightAdjustPx = Math.max(0, detailsRect.right - parentRect.right);
                         let bottomAdjustPx = Math.max(0, detailsRect.bottom - parentRect.bottom);
                         if (rightAdjustPx > 0 || bottomAdjustPx > 0) {
