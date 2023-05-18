@@ -246,10 +246,10 @@ export class CreativeCodingSurvey {
         console.log(bodyRectangle);
         const cellSize = 30;
         this.connectionCardGrid = new Grid(
-            0,
-            bodyRectangle.top,
-            bodyRectangle.width,
-            bodyRectangle.height,
+            cellSize,
+            bodyRectangle.top + cellSize,
+            bodyRectangle.width - 2 * cellSize,
+            bodyRectangle.height - 2 * cellSize,
             cellSize,
             body,
         );
