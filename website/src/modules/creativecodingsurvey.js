@@ -243,16 +243,19 @@ export class CreativeCodingSurvey {
 `;
 
         let bodyRectangle = body.getBoundingClientRect();
-        console.log(bodyRectangle);
         const cellSize = 30;
-        this.connectionCardGrid = new Grid(
-            cellSize,
-            bodyRectangle.top + cellSize,
-            bodyRectangle.width - 2 * cellSize,
-            bodyRectangle.height - 2 * cellSize,
-            cellSize,
-            body,
-        );
+        if (this.connectionCardGrid == null) {
+            this.connectionCardGrid = new Grid(
+                cellSize,
+                bodyRectangle.top + cellSize,
+                bodyRectangle.width - 2 * cellSize,
+                bodyRectangle.height - 2 * cellSize,
+                cellSize,
+                body,
+            );
+        } else {
+            this.connectionCardGrid.clearEntities();
+        }
 
         this.surveyData.forEach(responseEntity => {
             let responses = responseEntity.responses;
