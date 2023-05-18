@@ -299,10 +299,16 @@ export class CreativeCodingSurvey {
                 }
             });
 
-            //remove filters
+            // Remove filter when clicking on symbol
+            let symbolelem = document.getElementById(`${t}-filter-symbol`);
+            symbolelem.addEventListener('click', () => {
+                this.clearFilter(t);
+            });
+
+            // Remove filter when clicking on filter search term
             let filterelem = document.getElementById(`${t}-filter`);
-            filterelem.addEventListener('click', (event) => {
-                this.clearFilter(t, event.target.innerText);
+            filterelem.addEventListener('click', () => {
+                this.clearFilter(t);
             });
         }        
     }
