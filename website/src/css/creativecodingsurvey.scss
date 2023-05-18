@@ -325,17 +325,27 @@ section {
     & > div:not(:last-of-type) {
       margin-bottom: var(--marginScale);
     }
+
     .entity-details__discipline {
       color: #86BCD8;
       text-decoration: none;
+      &:hover{
+        text-decoration: underline 2px;
+      }
     }
     .entity-details__tool {
       color: green;
       text-decoration: none;
+      &:hover{
+        text-decoration: underline 2px;
+      }
     }
     .entity-details__countryOfResidence {
       color: gold;
       text-decoration: none;
+      &:hover{
+        text-decoration: underline 2px;
+      }
     }
   }
 }
@@ -437,7 +447,7 @@ section {
 
     .entity-details {
       max-width: 300px;
-      position: fixed;
+      position: absolute;
       flex-direction: column;
       justify-content: flex-start;
       align-items: flex-start;
@@ -453,7 +463,6 @@ section {
       .details > a{
         color: black;
       }
-
         a::before{
           content: none;
         }
@@ -462,14 +471,23 @@ section {
       .entity-details__discipline {
         color: #86BCD8;
         text-decoration: none;
+        &:hover{
+          text-decoration: underline 2px;
+        }
       }
       .entity-details__tool {
         color: green;
         text-decoration: none;
+        &:hover{
+          text-decoration: underline 2px;
+        }
       }
       .entity-details__countryOfResidence {
         color: gold;
         text-decoration: none;
+        &:hover{
+          text-decoration: underline 2px;
+        }
       }
 
     }
