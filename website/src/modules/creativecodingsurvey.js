@@ -87,12 +87,14 @@ export class CreativeCodingSurvey {
             contribute: {
                 url: "https://mapping.creativecodingutrecht.nl",
                 caption: "Contribute",
-                target: "_blank"
+                target: "_blank",
+                symbol: "⤴︎",
 
             },
             feedback: {
                 url: `mailto:info@creativecodingutrecht.nl?subject=${encodeURIComponent("Creative Coding Ecologies | Feedback")}`,
-                caption: "Feedback"
+                caption: "Feedback",
+                symbol: "✓",
             }
         }
         this.typeCount = {
@@ -198,17 +200,25 @@ export class CreativeCodingSurvey {
 
     makeLinks() {
         for (const link in this.links) {
-            const props = this.links[link];
-            const url = props.url;
-            const caption = props.caption;
-            const target = props.target ? `target=${props.target}` : "";
+            const caption = this.links[link].caption;
+            const symbol = this.links[link].symbol;
 
             let divLink = document.createElement('div');
             divLink.classList.add('link');
             divLink.id = `link-${link}`;
-            divLink.innerHTML = `<div id='${link}-link'><a href="${url}" ${target} alt="${caption}">${caption}</a></div>`;
+            divLink.innerHTML = `<div id='${link}-link' data-attr="${caption}">${symbol}</div>`;
 
             document.body.appendChild(divLink);
+
+            let e = document.getElementById(`${link}-link`);
+            e.addEventListener('click', (event) => {
+                const props = this.links[link];
+                const url = props.url;
+                const target = props.target;
+
+                console.log("Clicked on link: ", url)
+                window.open(url, target);
+            });
         }
     }
 
@@ -538,7 +548,6 @@ export class DOMEntity {
 
     showEntityDetails() {
         let entity = this.responseEntity;
-
         let entityDetails = document.createElement('div');
         // entityDetails.id            = 'd_' + entity.id;
         entityDetails.className = 'entity-details';

@@ -104,24 +104,35 @@ section {
 }
 
 .link {
-  padding: 3px;
-
-  position: absolute;
+  position: fixed;
   z-index: 1;
+  cursor: pointer;
 
   background-color: white;
 
   &#link-feedback {
-    left: 60px;
-    top: 250px;
+    padding: 5px 13px;
+    left: 1%;
+    bottom: 50px;
     border: 2px solid purple;
   }
 
   &#link-contribute {
-    left: 60px;
-    top: 300px;
+    padding: 5px 11px;
+    left: 1%;
+    bottom: 100px;
     border: 2px solid orange;
   }
+}
+
+#feedback-link:hover::after {
+  margin-left: 0.5rem;
+  content:attr(data-attr);
+}
+
+#contribute-link:hover::after {
+  margin-left: 0.5rem;
+  content:attr(data-attr);
 }
 
 .filter {
@@ -181,14 +192,6 @@ section {
 
   & > .filter-container > span {
     text-decoration: 1px solid green underline;
-  }
-}
-
-#tools-filter{
-  &:hover::after {
-    content: "tools";
-    padding-left: 1%;
-    display: inline;
   }
 }
 
