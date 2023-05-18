@@ -603,13 +603,13 @@ export class DOMEntity {
     }
 }
 
-const global_section = document.querySelector('.blury-cover');
-const connection_card = document.querySelector('#connection-card');
+// const global_section = document.querySelector('.blury-cover');
+// const connection_card = document.querySelector('#connection-card');
 
-global_section.addEventListener('click', () => {
-    connection_card.style.display = "none";
-    global_section.style.display = "none";
-})
+// global_section.addEventListener('click', () => {
+//     connection_card.style.display = "none";
+//     global_section.style.display = "none";
+// })
 
 
 // this is the default method executed when the project is loaded from the template initialisation
