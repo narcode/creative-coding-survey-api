@@ -166,9 +166,8 @@ section {
   &:hover > .filter-container {
     display: block;
     display: flex;
-    width: 500px;
+    width: 600px;
     flex-wrap: wrap;
-    font-size: 80%;
   }
 
   & > .filter-container > span{
@@ -176,6 +175,7 @@ section {
     // text-decoration: 1px solid red underline;
     line-height: 1.5em;
     cursor: default;
+    font-size: 1em;
   }
 }
 
@@ -185,13 +185,25 @@ section {
   & > .filter-container > span {
     text-decoration: 1px solid red underline;
   }
+
+  & > .filter-container > span:hover {
+    color:red;
+    cursor: pointer;
+  }
 }
+
+
 
 #filter-tools{
   border: 2px solid green;
 
   & > .filter-container > span {
     text-decoration: 1px solid green underline;
+  }
+
+  & > .filter-container > span:hover {
+    color:green;
+    cursor: pointer;
   }
 }
 
@@ -200,6 +212,11 @@ section {
 
   & > .filter-container > span {
     text-decoration: 1px solid gold underline;
+  }
+
+  & > .filter-container > span:hover {
+    color:gold;
+    cursor: pointer;
   }
 }
 
@@ -280,3 +297,5 @@ section {
   }
 
 }
+
+ 
