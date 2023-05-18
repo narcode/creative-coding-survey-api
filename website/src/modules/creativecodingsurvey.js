@@ -542,6 +542,7 @@ export class DOMEntity {
 
     showEntityDetails() {
         let entity = this.responseEntity;
+
         let entityDetails = document.createElement('div');
         // entityDetails.id            = 'd_' + entity.id;
         entityDetails.className = 'entity-details';
@@ -605,6 +606,15 @@ export class DOMEntity {
         return this.clickableEntity.classList.contains(class_);
     }
 }
+
+// const global_section = document.querySelector('.blury-cover');
+// const connection_card = document.querySelector('#connection-card');
+
+// global_section.addEventListener('click', () => {
+//     connection_card.style.display = "none";
+//     global_section.style.display = "none";
+// })
+
 
 // this is the default method executed when the project is loaded from the template initialisation
 export default element => {

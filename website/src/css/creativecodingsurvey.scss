@@ -15,8 +15,8 @@ body {
   // overflow: hidden;
   position: relative;
   font-family: 'Roboto Mono', monospace;
-  width: 150%;
-  height: 150%;
+  width: 100vw;
+  height: 100vh;
 }
 
 p {
@@ -34,18 +34,28 @@ a {
 }
 
 nav {
-  background:transparent;
-  padding: 0 15px;
+  width: 100vw;
+  display: flex;
+  flex-direction: row;
+  padding: 0;
   position: fixed;
+  z-index: 1000;
+
 
   ul {
+    padding: 0.5% 0.5%;
+    width: 100%;
     align-items: flex-start;
     flex-wrap: nowrap;
     background: none;
 
+    :first-child{
+      padding-left: 0;
+    }
+
     li {
       display: inline-flex;
-
+      background-color: white;
       width: auto;
       padding: 0.25rem 1rem;
 
@@ -63,6 +73,16 @@ nav {
         margin: 0 0.5rem;
       }
     }
+    .blury-cover {
+      display: none;
+      top: 0%;
+      left: 0%;
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      background:rgba(99, 101, 117, 0.614);
+    }
+
   }
 }
 
@@ -89,7 +109,7 @@ section {
   position: absolute;
   z-index: 1;
 
-  background-color: white;  
+  background-color: white;
 
   &#link-feedback {
     left: 60px;
@@ -105,25 +125,25 @@ section {
 }
 
 .filter {
-  padding: 3px;
-
-  position: absolute;
+  padding: 5px 12px;
+  cursor: pointer;
+  position: fixed;
   z-index: 1;
 
   background-color: white;
 
   &#filter-keywords {
-    left: 60px;
+    left: 1%;
     top: 100px;
   }
 
   &#filter-tools {
-    left: 60px;
+    left: 1%;
     top: 150px;
   }
 
   &#filter-countryOfResidence {
-    left: 60px;
+    left: 1%;
     top: 200px;
   }
 
@@ -150,10 +170,10 @@ section {
 
 #filter-keywords {
   border: 2px solid red;
-  
+
   & > .filter-container > span {
     text-decoration: 1px solid red underline;
-  }  
+  }
 }
 
 #filter-tools{
@@ -161,6 +181,14 @@ section {
 
   & > .filter-container > span {
     text-decoration: 1px solid green underline;
+  }
+}
+
+#tools-filter{
+  &:hover::after {
+    content: "tools";
+    padding-left: 1%;
+    display: inline;
   }
 }
 
@@ -240,4 +268,31 @@ section {
 
 .dropdown:hover .dropdown-content {
   display: block;
+}
+#connection-card{
+  display: none;
+  position: relative;
+  right: 0%;
+  width: 45vw;
+  height: 100vh;
+  background-color: white;
+  border-left:1px solid black ;
+  z-index: 1000;
+
+  .card-header{
+    height: 8%;
+    width: 100%;
+    border-bottom: 1px solid black;
+  }
+
+  .card-entities-space{
+    height: 72%;
+  }
+
+  .card-tags-buttons{
+    height: 20%;
+    width: 100%;
+    border-top: 1px solid black;
+  }
+
 }
