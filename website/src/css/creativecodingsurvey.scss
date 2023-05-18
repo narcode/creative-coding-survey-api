@@ -241,13 +241,13 @@ section {
     & > div:not(:last-of-type) {
       margin-bottom: var(--marginScale);
     }
-    .entity-details__disciplines {
+    .entity-details__discipline {
       color: red;
     }
-    .entity-details__tools {
+    .entity-details__tool {
       color: green;
     }
-    .entity-details__country {
+    .entity-details__countryOfResidence {
       color: gold;
     }
   }

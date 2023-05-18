@@ -106,6 +106,8 @@ export class CreativeCodingSurvey {
             event: 0,
             anonymous: 0,
         };
+        this.bluryCover = document.querySelector('.blury-cover');
+        this.connectionCard = document.querySelector('#connection-card');
 
         let root = document.documentElement;
         let viewport = window.visualViewport;
@@ -196,6 +198,29 @@ export class CreativeCodingSurvey {
         // set total number of entities in top nav
         const totalCountContainer = document.querySelector(`.menu li:first-of-type`);
         totalCountContainer.setAttribute('data-value', this.surveyData.length);
+
+
+        this.bluryCover.addEventListener('click', () => {
+            this.connectionCard.style.display = "none";
+            this.bluryCover.style.display = "none";
+        })
+
+        document.addEventListener('click', (event) => {
+            let classList = event.target.classList;
+            if (classList.contains('entity-details__countryOfResidence')) {
+                this.activateSideCard('country', event.target.innerText);
+            } else if (classList.contains('entity-details__discipline')) {
+                this.activateSideCard('disciplines', event.target.innerText);
+            } else if (classList.contains('entity-details__tool')) {
+                this.activateSideCard('tools', event.target.innerText);
+            }
+        });
+    }
+
+    activateSideCard(topField, value) {
+        this.connectionCard.style.display = "initial";
+        this.bluryCover.style.display = "initial";
+        console.log(topField, value);
     }
 
     makeLinks() {
@@ -548,16 +573,18 @@ export class DOMEntity {
 
     showEntityDetails() {
         let entity = this.responseEntity;
+
+        let toolAnchors = 'tools' in entity.responses ? entity.responses.tools.map(tool => `<a class='entity-details__tool'>${tool}</a>`).join(' ') : '';
+        let disciplineAnchors = 'disciplines' in entity.responses ? entity.responses.disciplines.map(tool => `<a class='entity-details__discipline'>${tool}</a>`).join(' ') : '';
+
         let entityDetails = document.createElement('div');
-        // entityDetails.id            = 'd_' + entity.id;
         entityDetails.className = 'entity-details';
         entityDetails.innerHTML = `
             <div class='details'>${replaceUndefined(entity.responses.name)}</div>
             <div class='details'>${makeWebsiteLink(entity.responses.website, true)}</div>
-            <div class='details'>${replaceUndefined(entity.responses.countryOfResidence)}</div>
-            <div class="entity-details__disciplines details">${('disciplines' in entity.responses ? entity.responses.disciplines.join(' ') : '')}</div>
-            <div class="entity-details__tools details">${('tools' in entity.responses ? entity.responses.tools.join(' ') : '')}</div>`;
-
+            <div class='details'><a class='entity-details__countryOfResidence'>${replaceUndefined(entity.responses.countryOfResidence)}</a></div>
+            <div class="entity-details__disciplines details">${disciplineAnchors}</div>
+            <div class="entity-details__tools details">${toolAnchors}</div>`;
         return entityDetails;
     }
 
@@ -611,15 +638,6 @@ export class DOMEntity {
         return this.clickableEntity.classList.contains(class_);
     }
 }
-
-// const global_section = document.querySelector('.blury-cover');
-// const connection_card = document.querySelector('#connection-card');
-
-// global_section.addEventListener('click', () => {
-//     connection_card.style.display = "none";
-//     global_section.style.display = "none";
-// })
-
 
 // this is the default method executed when the project is loaded from the template initialisation
 export default element => {
