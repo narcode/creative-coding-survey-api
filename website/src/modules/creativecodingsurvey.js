@@ -52,8 +52,8 @@ function distance(a, b) {
     return Math.hypot(b.x - a.x, b.y - a.y);
 }
 
-const extraRadius = 100;
-const clearanceRadius = 40;
+const extraRadius = 130;
+const clearanceRadius = 30;
 
 function computeMovePositionInOrbit(center, xRadius, yRadius) {
     const angle = randomAngle();
@@ -88,8 +88,8 @@ export class CreativeCodingSurvey {
                 url: "https://mapping.creativecodingutrecht.nl",
                 caption: "Contribute",
                 target: "_blank"
-                
-            }, 
+
+            },
             feedback: {
                 url: `mailto:info@creativecodingutrecht.nl?subject=${encodeURIComponent("Creative Coding Ecologies | Feedback")}`,
                 caption: "Feedback"
@@ -174,7 +174,7 @@ export class CreativeCodingSurvey {
         this.makeColophon();
 
         const topOffset = 100;
-        const cellSize = 20;
+        const cellSize = 30;
         this.mainGrid = new Grid(
             0,
             topOffset,
@@ -386,47 +386,46 @@ class Grid {
         this.topOffset = topOffset;
         this.width = width;
         this.height = height;
-        this.cellSize = cellSize;
+        this.microCellRatio = 3;
+        this.microCellSize = cellSize / this.microCellRatio;
+        this.initialCellSize = cellSize;
         this.occupied = {};
         this.domEntities = []
     }
 
     addEntity(responseEntity) {
-        let [x, y] = this.randomPlacement();
-        let domEntity = new DOMEntity(responseEntity, this.translateX(x), this.translateY(y));
-        this.addEntityToOccupied(x, y, domEntity);
+        let cell = this.randomCell();
+        let domEntity = new DOMEntity(responseEntity, this.translateFromCell(cell));
+        this.addEntityToOccupied(cell, domEntity);
         this.domEntities.push(domEntity);
     }
 
-    randomPlacement() {
-        // There's a better way of doing this when we know in advance all the entities
-        let y = randomInt(this.height / this.cellSize);
-        let x = randomInt(this.width / this.cellSize);
+    randomCell() {
+        let y = randomInt(this.height / this.initialCellSize) * this.microCellRatio;
+        let x = randomInt(this.width / this.initialCellSize) * this.microCellRatio;
         while (this.isOccupied(x, y)) {
-            y = randomInt(this.height / this.cellSize);
-            x = randomInt(this.width / this.cellSize);
+            y = randomInt(this.height / this.microCellSize);
+            x = randomInt(this.width / this.microCellSize);
         }
-        return [x, y];
+        return {x, y};
     }
 
     isOccupied(x, y) {
         return x in this.occupied && y in this.occupied[x];
     }
 
-    translateX(x) {
-        return this.leftOffset + x * this.cellSize;
+    translateFromCell({x, y}) {
+        return {
+            x: this.leftOffset + x * this.microCellSize,
+            y: this.topOffset + y * this.microCellSize,
+        };
     }
 
-    translateY(y) {
-        return this.topOffset + y * this.cellSize;
-    }
-
-    translateXBack(x) {
-        return Math.floor((x - this.leftOffset) / this.cellSize);
-    }
-
-    translateYBack(y) {
-        return Math.floor((y - this.topOffset) / this.cellSize);
+    translateToCell({x, y}, cellSize) {
+        return {
+            x: Math.floor((x - this.leftOffset) / cellSize) * (cellSize / this.microCellSize),
+            y: Math.floor((y - this.topOffset) / cellSize) * (cellSize / this.microCellSize),
+        };
     }
 
     moveEntitiesForDiscipline(disciplineCheckbox) {
@@ -442,52 +441,44 @@ class Grid {
         }
     }
 
-    randomPlacementInOrbit(center, xRadius, yRadius) {
-        let { x, y } = computeMovePositionInOrbit(center, xRadius, yRadius);
-        x = this.translateXBack(x);
-        y = this.translateYBack(y);
-        while (this.isOccupied(x, y)) {
-            let point = computeMovePositionInOrbit(center, xRadius, yRadius);
-            x = this.translateXBack(point.x);
-            y = this.translateYBack(point.y);
+    randomCellInOrbit(center, xRadius, yRadius) {
+        let point = computeMovePositionInOrbit(center, xRadius, yRadius);
+        let cell = this.translateToCell(point, this.initialCellSize);
+        while (this.isOccupied(cell.x, cell.y)) {
+            point = computeMovePositionInOrbit(center, xRadius, yRadius);
+            cell  = this.translateToCell(point, this.microCellSize);
         }
-        return { x, y };
+        return cell;
     }
 
-    randomPlacementOutOfOrbit(center, xRadius, yRadius, originalPosition) {
+    randomCellOutOfOrbit(center, xRadius, yRadius, originalPosition) {
         let point = computeMovePositionOutOfOrbit(center, xRadius, yRadius, originalPosition);
         if (point == null) {
             return null;
         }
-        let x = this.translateXBack(point.x);
-        let y = this.translateYBack(point.y);
-        while (this.isOccupied(x, y)) {
+        let cell = this.translateToCell(point, this.initialCellSize);
+        while (this.isOccupied(cell.x, cell.y)) {
             point = computeMovePositionOutOfOrbit(center, xRadius, yRadius, originalPosition);
             if (point == null) {
                 return null;
             }
-            x = this.translateXBack(point.x);
-            y = this.translateYBack(point.y);
+            cell = this.translateToCell(point, this.microCellSize);
         }
-        return { x, y };
+        return cell;
     }
 
     moveEntityForSelectedDiscipline(entity, disciplineId, center, xRadius, yRadius) {
         if (entity.hasClass(disciplineId)) {
             this.removeEntityFromOccupied(entity);
-            let newPos = this.randomPlacementInOrbit(center, xRadius, yRadius);
-            this.addEntityToOccupied(newPos.x, newPos.y, entity);
-            newPos.x = this.translateX(newPos.x);
-            newPos.y = this.translateY(newPos.y);
-            entity.selectedMoveTo(disciplineId, newPos);
+            let cell = this.randomCellInOrbit(center, xRadius, yRadius);
+            this.addEntityToOccupied(cell, entity);
+            entity.selectedMoveTo(disciplineId, this.translateFromCell(cell));
         } else {
-            const point = this.randomPlacementOutOfOrbit(center, xRadius, yRadius, entity.originalPosition());
-            if (point != null) {
+            const cell = this.randomCellOutOfOrbit(center, xRadius, yRadius, entity.originalPosition());
+            if (cell != null) {
                 this.removeEntityFromOccupied(entity);
-                this.addEntityToOccupied(point.x, point.y, entity);
-                point.x = this.translateX(point.x);
-                point.y = this.translateY(point.y);
-                entity.unselectedMoveTo(disciplineId, point);
+                this.addEntityToOccupied(cell, entity);
+                entity.unselectedMoveTo(disciplineId, this.translateFromCell(cell));
             }
         }
     }
@@ -499,20 +490,21 @@ class Grid {
 
     removeEntityFromOccupied(entity) {
         let pos = entity.position();
-        delete this.occupied[this.translateXBack(pos.x)][this.translateYBack(pos.y)];
+        let cell = this.translateToCell(pos, this.microCellSize);
+        delete this.occupied[cell.x][cell.y];
     }
 
-    addEntityToOccupied(x, y, entity) {
-        if (!(x in this.occupied)) {
-            this.occupied[x] = {};
+    addEntityToOccupied(cell, entity) {
+        if (!(cell.x in this.occupied)) {
+            this.occupied[cell.x] = {};
         }
-        this.occupied[x][y] = entity;
+        this.occupied[cell.x][cell.y] = entity;
     }
 }
 
 // this creates a unique DOM entity from a surveyData row
 export class DOMEntity {
-    constructor(responseEntity, randX, randY) {
+    constructor(responseEntity, point) {
         // console.log(responseEntity);
         const entityType = responseEntity.entityType;
 
@@ -545,7 +537,7 @@ export class DOMEntity {
 
         this.responseEntity = responseEntity;
         this.clickableEntity = clickableEntity;
-        this.taggedOriginalPosition = { tag: "origin", point: { x: randX, y: randY } };
+        this.taggedOriginalPosition = {tag: "origin", point};
         this.positionStack = [this.taggedOriginalPosition];
         this.moveToPosition();
     }
