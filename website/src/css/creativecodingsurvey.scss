@@ -374,18 +374,43 @@ section {
     }
 
     .entity-details {
-      max-width: auto;
+      max-width: 300px;
       display: none;
       position: fixed;
       flex-direction: column;
       justify-content: flex-start;
       align-items: flex-start;
       flex-wrap: wrap;
-      padding: 2px 0;
-      &:hover{
-        background-color: black;
-        color: white;
-      }  
+      margin-left: 100px;
+      margin-top: -10px;
+      text-align: left;
+
+      .details{
+        color:black;
+        padding-left: 5%;
+      
+      .details > a{
+        color: black;
+      }
+
+        a::before{
+          content: none;
+        }
+      }
+
+      .entity-details__discipline {
+        color: #86BCD8;
+        text-decoration: none;
+      }
+      .entity-details__tool {
+        color: green;
+        text-decoration: none;
+      }
+      .entity-details__countryOfResidence {
+        color: gold;
+        text-decoration: none;
+      }
+
     }
   }
 }
