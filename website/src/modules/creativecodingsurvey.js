@@ -198,23 +198,17 @@ export class CreativeCodingSurvey {
 
     makeLinks() {
         for (const link in this.links) {
-            const caption = this.links[link].caption;
+            const props = this.links[link];
+            const url = props.url;
+            const caption = props.caption;
+            const target = props.target ? `target=${props.target}` : "";
+
             let divLink = document.createElement('div');
             divLink.classList.add('link');
             divLink.id = `link-${link}`;
-            divLink.innerHTML = `<div id='${link}-link'>${caption}</div>`;
+            divLink.innerHTML = `<div id='${link}-link'><a href="${url}" ${target} alt="${caption}">${caption}</a></div>`;
 
             document.body.appendChild(divLink);
-
-            let e = document.getElementById(`${link}-link`);
-            e.addEventListener('click', (event) => {
-                const props = this.links[link];
-                const url = props.url;
-                const target = props.target;
-
-                console.log("Clicked on link: ", url)
-                window.open(url, target);
-            });
         }
     }
 
