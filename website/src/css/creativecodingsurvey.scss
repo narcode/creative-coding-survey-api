@@ -83,6 +83,27 @@ section {
   }
 }
 
+.link {
+  padding: 3px;
+
+  position: absolute;
+  z-index: 1;
+
+  background-color: white;  
+
+  &#link-feedback {
+    left: 60px;
+    top: 250px;
+    border: 2px solid purple;
+  }
+
+  &#link-contribute {
+    left: 60px;
+    top: 300px;
+    border: 2px solid orange;
+  }
+}
+
 .filter {
   padding: 3px;
 

@@ -14,15 +14,15 @@ function makeWebsiteLink(s) {
         return 'anonymous';
     } else {
         if (s.includes('http')) {
-            return "<a target='_blank' href='"+s+"'>"+s+"</a>";
+            return "<a target='_blank' href='" + s + "'>" + s + "</a>";
         } else {
-            return "<a target='_blank' href='https://"+s+"'>"+s+"</a>";
+            return "<a target='_blank' href='https://" + s + "'>" + s + "</a>";
         }
     }
 }
 
 function randomInt(max) {
-  return Math.floor(Math.random() * max);
+    return Math.floor(Math.random() * max);
 }
 
 function randomAngle() {
@@ -43,8 +43,8 @@ function elipseAngleAtPoint(center, point) {
 
 function polarToCartesian(angle, radius, offset) {
     return {
-      x: radius * Math.sin(angle) + offset.x,
-      y: radius * Math.cos(angle) + offset.y,
+        x: radius * Math.sin(angle) + offset.x,
+        y: radius * Math.cos(angle) + offset.y,
     };
 }
 
@@ -79,11 +79,23 @@ export class CreativeCodingSurvey {
     constructor(element, responseData) {
         // start by exposing the survey data to the DOM and window instance
         // values of the window entries will update along with the state
-        this.surveyData         = window.entities = responseData;
+        this.surveyData = window.entities = responseData;
 
-        this.allDisciplines     = [];
-        this.allFilters        =  { "countryOfResidence": [], "tools": [], "keywords": [] };
-        this.typeCount          = {
+        this.allDisciplines = [];
+        this.allFilters = { countryOfResidence: [], tools: [], keywords: [] };
+        this.links = {
+            contribute: {
+                url: "https://mapping.creativecodingutrecht.nl",
+                caption: "Contribute",
+                target: "_blank"
+                
+            }, 
+            feedback: {
+                url: `mailto:info@creativecodingutrecht.nl?subject=${encodeURIComponent("Creative Coding Ecologies | Feedback")}`,
+                caption: "Feedback"
+            }
+        }
+        this.typeCount = {
             enthusiast: 0,
             maker: 0,
             organisation: 0,
@@ -98,8 +110,8 @@ export class CreativeCodingSurvey {
 
         // for scaling the font and layout when zoomin in and out (pinching getsure on trackpad/mobile)
         viewport.addEventListener("resize", () => {
-            let marginScale = 0.5/viewport.scale
-            let fontScale = 100/viewport.scale
+            let marginScale = 0.5 / viewport.scale
+            let fontScale = 100 / viewport.scale
             let ents = Array.from(document.querySelectorAll('.entity-container'));
             let textdivs = Array.from(document.querySelectorAll('.entity-container .entity-details > div:not(:last-of-type)'));
             ents.forEach(ent => {
@@ -112,8 +124,8 @@ export class CreativeCodingSurvey {
 
         root.addEventListener("mousemove", e => {
             let boxShadow = {
-                x: this.lerpCoordinates((window.innerWidth/2 - e.clientX), 0, -window.innerWidth, 0, 5),
-                y: this.lerpCoordinates((window.innerHeight/2 - e.clientY), 0, -window.innerHeight, 0, 5)
+                x: this.lerpCoordinates((window.innerWidth / 2 - e.clientX), 0, -window.innerWidth, 0, 5),
+                y: this.lerpCoordinates((window.innerHeight / 2 - e.clientY), 0, -window.innerHeight, 0, 5)
             };
 
             root.style.setProperty('--boxShadowX', `${boxShadow.x}px`);
@@ -129,7 +141,7 @@ export class CreativeCodingSurvey {
         for (const t in this.allFilters) {
             let divFilter = document.createElement('div');
             divFilter.classList.add('filter');
-            divFilter.id        = `filter-${t}`;
+            divFilter.id = `filter-${t}`;
             divFilter.innerHTML = `<div id='${t}-filter'>+</div>`;
 
             document.body.appendChild(divFilter);
@@ -157,6 +169,8 @@ export class CreativeCodingSurvey {
             });
         }
 
+        this.makeLinks();
+
         this.makeColophon();
 
         const topOffset = 100;
@@ -178,12 +192,34 @@ export class CreativeCodingSurvey {
         this.updateTypeTotals();
 
         // set total number of entities in top nav
-        const totalCountContainer = document.querySelector( `.menu li:first-of-type`);
+        const totalCountContainer = document.querySelector(`.menu li:first-of-type`);
         totalCountContainer.setAttribute('data-value', this.surveyData.length);
     }
 
+    makeLinks() {
+        for (const link in this.links) {
+            const caption = this.links[link].caption;
+            let divLink = document.createElement('div');
+            divLink.classList.add('link');
+            divLink.id = `link-${link}`;
+            divLink.innerHTML = `<div id='${link}-link'>${caption}</div>`;
+
+            document.body.appendChild(divLink);
+
+            let e = document.getElementById(`${link}-link`);
+            e.addEventListener('click', (event) => {
+                const props = this.links[link];
+                const url = props.url;
+                const target = props.target;
+
+                console.log("Clicked on link: ", url)
+                window.open(url, target);
+            });
+        }
+    }
+
     processResponseEntity(responseEntity) {
-        const entityType    = responseEntity.responses.type && responseEntity.responses.type.length ? responseEntity.responses.type[0].toString().toLowerCase().trim() : 'anonymous';
+        const entityType = responseEntity.responses.type && responseEntity.responses.type.length ? responseEntity.responses.type[0].toString().toLowerCase().trim() : 'anonymous';
 
         responseEntity.entityType = entityType;
 
@@ -224,23 +260,23 @@ export class CreativeCodingSurvey {
 
     updateTypeTotals() {
         for (const [type, count] of Object.entries(this.typeCount)) {
-            const typeContainer = document.querySelector( `.menu li.${type} p`);
+            const typeContainer = document.querySelector(`.menu li.${type} p`);
             typeContainer.setAttribute('data-value', count);
         }
     }
 
     makeColophon() {
-        const randX         = Math.floor(Math.random() * window.innerWidth);
-        const randY         = Math.floor(Math.random() * window.innerHeight);
+        const randX = Math.floor(Math.random() * window.innerWidth);
+        const randY = Math.floor(Math.random() * window.innerHeight);
         const top = randY + 100;
 
-        let colophonEntity                  = document.createElement('div');
+        let colophonEntity = document.createElement('div');
         colophonEntity.style.animationDelay = `${Math.random() * -100}s`;
-        colophonEntity.style.transition     = "all 0.5s ease-in";
-        colophonEntity.style.left           = `${randX - 10}px`;
-        colophonEntity.style.top            = `${top - 10}px`;
-        colophonEntity.style.height         = `25px`;
-        colophonEntity.style.width          = `25px`;
+        colophonEntity.style.transition = "all 0.5s ease-in";
+        colophonEntity.style.left = `${randX - 10}px`;
+        colophonEntity.style.top = `${top - 10}px`;
+        colophonEntity.style.height = `25px`;
+        colophonEntity.style.width = `25px`;
         colophonEntity.style.backgroundSize = `25px`;
 
         colophonEntity.innerHTML = `<div class='colophon-details'>
@@ -260,14 +296,14 @@ export class CreativeCodingSurvey {
             </div>
             </div>`;
 
-        colophonEntity.classList.add(`entity-container`,`colophon`, `icon`, `icon-colophon`);
+        colophonEntity.classList.add(`entity-container`, `colophon`, `icon`, `icon-colophon`);
         document.body.appendChild(colophonEntity);
     }
 
     createFilterContainer(filtertype) {
         let filterContainer = document.createElement('div');
-            filterContainer.classList.add('filter-container');
-            filterContainer.id         = `${filtertype}-container`;
+        filterContainer.classList.add('filter-container');
+        filterContainer.id = `${filtertype}-container`;
         this.allFilters[filtertype].map((f, i) => {
             filterContainer.insertAdjacentHTML('beforeend', `<span>${f}</span>`)
         });
@@ -336,7 +372,7 @@ export class CreativeCodingSurvey {
     }
 
     lerpCoordinates(mousePosition, boundingMin, boundingMax, lerpMin, lerpMax) {
-        return (mousePosition - boundingMin)/(boundingMax - boundingMin) * (lerpMax - lerpMin) + lerpMin;
+        return (mousePosition - boundingMin) / (boundingMax - boundingMin) * (lerpMax - lerpMin) + lerpMin;
     }
 
     windowResized() {
@@ -399,7 +435,7 @@ class Grid {
             const label = disciplineCheckbox.labels[0];
             const xRadius = label.offsetWidth / 2;
             const yRadius = label.offsetHeight / 2;
-            const center = {x: label.offsetLeft + xRadius, y: label.offsetTop + yRadius};
+            const center = { x: label.offsetLeft + xRadius, y: label.offsetTop + yRadius };
             this.domEntities.forEach((entity) => this.moveEntityForSelectedDiscipline(entity, id, center, xRadius, yRadius));
         } else {
             this.domEntities.forEach((entity) => this.moveEntityForUnselectedDiscipline(entity, id));
@@ -407,7 +443,7 @@ class Grid {
     }
 
     randomPlacementInOrbit(center, xRadius, yRadius) {
-        let {x, y} = computeMovePositionInOrbit(center, xRadius, yRadius);
+        let { x, y } = computeMovePositionInOrbit(center, xRadius, yRadius);
         x = this.translateXBack(x);
         y = this.translateYBack(y);
         while (this.isOccupied(x, y)) {
@@ -415,7 +451,7 @@ class Grid {
             x = this.translateXBack(point.x);
             y = this.translateYBack(point.y);
         }
-        return {x, y};
+        return { x, y };
     }
 
     randomPlacementOutOfOrbit(center, xRadius, yRadius, originalPosition) {
@@ -433,7 +469,7 @@ class Grid {
             x = this.translateXBack(point.x);
             y = this.translateYBack(point.y);
         }
-        return {x, y};
+        return { x, y };
     }
 
     moveEntityForSelectedDiscipline(entity, disciplineId, center, xRadius, yRadius) {
@@ -478,10 +514,10 @@ class Grid {
 export class DOMEntity {
     constructor(responseEntity, randX, randY) {
         // console.log(responseEntity);
-        const entityType    = responseEntity.entityType;
+        const entityType = responseEntity.entityType;
 
-        let clickableEntity         = document.createElement('div');
-        clickableEntity.id          = responseEntity.id;
+        let clickableEntity = document.createElement('div');
+        clickableEntity.id = responseEntity.id;
 
         // Make the starting point of the jitter animation random
         clickableEntity.style.animationDelay = `${Math.random() * -100}s`;
@@ -492,9 +528,9 @@ export class DOMEntity {
         // collect all unique disciplines in a designated array
         for (let entityDiscipline of responseEntity.responses.disciplines) {
             // decorate icon with a recognisable className
-            clickableEntity.classList.add(entityDiscipline.toLowerCase().replace(' ',''));
+            clickableEntity.classList.add(entityDiscipline.toLowerCase().replace(' ', ''));
         }
-        clickableEntity.classList.add( `entity-container`, `icon`, `icon-${entityType}`);
+        clickableEntity.classList.add(`entity-container`, `icon`, `icon-${entityType}`);
 
         document.body.appendChild(clickableEntity);
 
@@ -509,17 +545,17 @@ export class DOMEntity {
 
         this.responseEntity = responseEntity;
         this.clickableEntity = clickableEntity;
-        this.taggedOriginalPosition = {tag: "origin", point: {x: randX, y: randY}};
+        this.taggedOriginalPosition = { tag: "origin", point: { x: randX, y: randY } };
         this.positionStack = [this.taggedOriginalPosition];
         this.moveToPosition();
     }
 
     showEntityDetails() {
         let entity = this.responseEntity;
-        let entityDetails           = document.createElement('div');
-            // entityDetails.id            = 'd_' + entity.id;
-            entityDetails.className     = 'entity-details';
-            entityDetails.innerHTML     = `
+        let entityDetails = document.createElement('div');
+        // entityDetails.id            = 'd_' + entity.id;
+        entityDetails.className = 'entity-details';
+        entityDetails.innerHTML = `
             <div class='details'>${replaceUndefined(entity.responses.name)}</div>
             <div class='details'>${makeWebsiteLink(entity.responses.website, true)}</div>
             <div class='details'>${replaceUndefined(entity.responses.countryOfResidence)}</div>
@@ -530,7 +566,7 @@ export class DOMEntity {
     }
 
     unselectedMoveTo(tag, point) {
-        this.positionStack[0] = {tag, point};
+        this.positionStack[0] = { tag, point };
         this.moveToPosition();
     }
 
@@ -538,7 +574,7 @@ export class DOMEntity {
         if (this.positionStack.length === 1) {
             this.clickableEntity.classList.add('selected');
         }
-        this.positionStack.push({tag, point});
+        this.positionStack.push({ tag, point });
         this.moveToPosition();
     }
 
@@ -546,7 +582,7 @@ export class DOMEntity {
     }
 
     moveToPosition() {
-        const {x, y} = this.position();
+        const { x, y } = this.position();
         this.clickableEntity.style.left = `${x - 10}px`;
         this.clickableEntity.style.top = `${y - 10}px`;
     }
@@ -560,7 +596,7 @@ export class DOMEntity {
     }
 
     resetPosition(tagToReset) {
-        const index = this.positionStack.findIndex(({tag}) => tag === tagToReset);
+        const index = this.positionStack.findIndex(({ tag }) => tag === tagToReset);
         if (index === 0) {
             this.positionStack[0] = this.taggedOriginalPosition;
             this.moveToPosition();
