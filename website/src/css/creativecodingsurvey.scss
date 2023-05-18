@@ -312,12 +312,12 @@ section {
   }
 
   .dropdown-content {
+    text-align: center;
     display: none;
     background-color: white !important;
-
+    left: -2px;
     position: absolute;
-    width: 200px;
-    min-height: 0px;
+    width: 100%;
     max-height: 200px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     border: 1px solid black;
@@ -335,5 +335,5 @@ section {
 }
 
 .dropdown:hover .dropdown-content {
-  // display: block;
+  display: block;
 }
