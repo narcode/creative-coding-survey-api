@@ -363,7 +363,7 @@ export class CreativeCodingSurvey {
                         let rightAdjustPx = Math.max(0, detailsRect.right - parentRect.right);
                         let bottomAdjustPx = Math.max(0, detailsRect.bottom - parentRect.bottom);
                         if (rightAdjustPx > 0 || bottomAdjustPx > 0) {
-                            details.style.transform = `translate(-${rightAdjustPx}px, -${bottomAdjustPx})`;
+                            details.style.transform = `translate(-${rightAdjustPx}px, -${bottomAdjustPx})px`;
                         }        
                     }
 
