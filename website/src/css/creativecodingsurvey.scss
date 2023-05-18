@@ -188,6 +188,23 @@ section {
 #filter-keywords {
   border: 2px solid red;
 
+  & > #keywords-filter-symbol{
+    display: inline;
+  }
+
+  & > #keywords-filter-symbol::after{
+    content: "&";
+  }
+
+  & > #keywords-filter-symbol.filter-active::after{
+    content: "✕";
+  }
+
+  & > #keywords-filter-symbol + div{
+    margin-left: 8px;
+    display: inline;
+  }
+
   & > .filter-container > span {
     text-decoration: 1px solid red underline;
   }
@@ -202,6 +219,23 @@ section {
 
 #filter-tools{
   border: 2px solid green;
+
+  & > #tools-filter-symbol{
+    display: inline;
+  }
+
+  & > #tools-filter-symbol::after{
+    content: "≈";
+  }
+
+  & > #tools-filter-symbol.filter-active::after{
+    content: "✕";
+  }
+
+  & > #tools-filter-symbol + div{
+    margin-left: 8px;
+    display: inline;
+  }
 
   & > .filter-container > span {
     text-decoration: 1px solid green underline;
