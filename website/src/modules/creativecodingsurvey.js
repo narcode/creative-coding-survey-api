@@ -152,37 +152,7 @@ export class CreativeCodingSurvey {
             this.mainGrid.moveEntitiesForDiscipline(e.target);
         })
 
-        // 3 filters.
-        for (const t in this.allFilters) {
-            let divFilter = document.createElement('div');
-            divFilter.classList.add('filter');
-            divFilter.id = `filter-${t}`;
-            divFilter.innerHTML = `<div id='${t}-filter'>+</div>`;
-
-            document.body.appendChild(divFilter);
-
-            divFilter.addEventListener('mouseover', (event) => {
-                if (!document.getElementById(`${t}-container`)) {
-                    let optionsContainer = this.createFilterContainer(t);
-                    event.target.appendChild(optionsContainer);
-
-                    optionsContainer.addEventListener('click', (event) => {
-                        const isSpan = event.target.nodeName === 'SPAN';
-                        if (!isSpan) {
-                            return;
-                        }
-
-                        this.addFilter(t, event.target.innerText);
-                    })
-                }
-            });
-
-            //remove filters
-            let filterelem = document.getElementById(`${t}-filter`);
-            filterelem.addEventListener('click', (event) => {
-                this.clearFilter(t, event.target.innerText);
-            });
-        }
+        this.makeFilters();
 
         this.makeLinks();
 
@@ -361,10 +331,10 @@ export class CreativeCodingSurvey {
             <a href='https://mapping.creativecodingutrecht.nl/' target='_blank'>https://mapping.creativecodingutrecht.nl/</a>
             </br></br>
             This is a collaboration between Creative Coding Utrecht and
-            designer-researcher Avital Barkai, made possible by Creative Industries Fund NL and part of On-the-Fly,
+            designer-researchers Avital Barkai and Camilo Garcia, made possible by Creative Industries Fund NL and part of On-the-Fly,
             a project co-funded by the Creative Europe program of the European Union.
             </br></br>
-            Development, backend and frontend by Felipe Ignacio Noriega, Raphael Sousa Santos and Sietse van der Meer.
+            Development, backend and frontend by Felipe Ignacio Noriega, Niels Janssen, Raphael Sousa Santos, and Sietse van der Meer.
             </br></br>
             <div style='display: flex; align-items: center; justify-content:'>
             <div><img width="100%" src=${cceLogo}></img></div>
@@ -374,6 +344,39 @@ export class CreativeCodingSurvey {
 
         colophonEntity.classList.add(`entity-container`, `colophon`, `icon`, `icon-colophon`);
         document.body.appendChild(colophonEntity);
+    }
+
+    makeFilters() {
+        // 3 filters.
+        for (const t in this.allFilters) {
+            let divFilter = document.createElement('div');
+            divFilter.classList.add('filter');
+            divFilter.id = `filter-${t}`;
+            divFilter.innerHTML = `<div id='${t}-filter-symbol'></div><div id='${t}-filter'></div>`;
+            document.body.appendChild(divFilter);
+            
+            divFilter.addEventListener('mouseover', (event) => {
+                if (!document.getElementById(`${t}-container`)) {
+                    let optionsContainer = this.createFilterContainer(t);
+                    event.target.appendChild(optionsContainer);
+
+                    optionsContainer.addEventListener('click', (event) => {
+                        const isSpan = event.target.nodeName === 'SPAN';
+                        if (!isSpan) {
+                            return;
+                        }
+
+                        this.addFilter(t, event.target.innerText);
+                    })
+                }
+            });
+
+            //remove filters
+            let filterelem = document.getElementById(`${t}-filter`);
+            filterelem.addEventListener('click', (event) => {
+                this.clearFilter(t, event.target.innerText);
+            });
+        }        
     }
 
     createFilterContainer(filtertype) {
@@ -391,13 +394,10 @@ export class CreativeCodingSurvey {
         let k = document.getElementById(`keywords-filter`);
         let t = document.getElementById(`tools-filter`);
         let c = document.getElementById(`countryOfResidence-filter`);
-        let getK = k.innerText.replace('- ', '');
-        let getT = t.innerText.replace('- ', '');
-        let getC = c.innerText.replace('- ', '');
-        console.log(getK, getT, getC);
-        let keyword = getK;
-        let tool = getT;
-        let country = getC;
+        let keyword = k.innerText;
+        let tool = t.innerText;
+        let country = c.innerText;
+        // console.log(keyword, tool, country);
 
         window.entities.map(i => {
             let entity = document.getElementById(i.id);
@@ -405,20 +405,20 @@ export class CreativeCodingSurvey {
             let shadowColorT = 'transparent';
             let shadowColorC = 'transparent';
 
-            // keywords
-            let entityMatchesK = (i.responses.keywords.find(e => e === keyword) !== undefined)
+            // keywords            
+            let entityMatchesK = (keyword !== "" && (i.responses.keywords.find(e => e === keyword) !== undefined))
             if (entityMatchesK) {
                 shadowColorK = '#ff0000c7';
             }
 
             // tools
-            let entityMatchesT = (i.responses.tools.find(e => e === tool) !== undefined)
+            let entityMatchesT = (tool !== "" && (i.responses.tools.find(e => e === tool) !== undefined))
             if (entityMatchesT) {
                 shadowColorT = '#2af366be'
             }
 
             // countryOfResidence
-            let entityMatchesC = (i.responses.countryOfResidence === country)
+            let entityMatchesC = (country !== "" && (i.responses.countryOfResidence === country))
             if (entityMatchesC) {
                 shadowColorC = 'gold'
             }
@@ -436,14 +436,20 @@ export class CreativeCodingSurvey {
     }
 
     addFilter(filtertype, s) {
-        let f = document.getElementById(`${filtertype}-filter`);
-        f.innerText = `- ${s}`;
+        let symbol = document.getElementById(`${filtertype}-filter-symbol`);
+        symbol.classList.add('filter-active');
+
+        let search = document.getElementById(`${filtertype}-filter`);
+        search.innerText = `${s}`;
         this.decorateEntities();
     }
 
     clearFilter(filtertype) {
-        let f = document.getElementById(`${filtertype}-filter`);
-        f.innerText = `+`;
+        let symbol = document.getElementById(`${filtertype}-filter-symbol`);
+        symbol.classList.remove('filter-active');
+
+        let search = document.getElementById(`${filtertype}-filter`);
+        search.innerText = ``;
         this.decorateEntities();
     }
 
