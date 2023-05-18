@@ -343,7 +343,7 @@ export class CreativeCodingSurvey {
 
             const dropdownContainer = document.querySelector(`.menu li.${type} span.dropdown-content`);
             for (const item of arr) {
-                let elemitem = document.createElement('span'); 
+                let elemitem = document.createElement('span');                 
                 elemitem.classList.add('dropdown-entity');
 
                 elemitem.innerText = `${replaceUndefined(item.name)}`;
@@ -351,15 +351,24 @@ export class CreativeCodingSurvey {
 
                 // we're adding the entity details container once, on the first hover, after that css does the showing and the hiding
                 elemitem.addEventListener('mouseover', (event) => {
-                    const entity = document.getElementById(item.id);
-                    if (!elemitem.querySelector('.entity-details')) {
-                        const details = entity.domEntity.showEntityDetails();
+                    let details = elemitem.querySelector('.entity-details');
+
+                    if (!details) {
+                        const entity = document.getElementById(item.id);
+                        details = entity.domEntity.showEntityDetails();
                         elemitem.appendChild(details);
                     }
+
+                    details.style.display = 'flex';
                 });
 
+                elemitem.addEventListener('mouseout', (event) => {
+                    let details = elemitem.querySelector('.entity-details');
+                    details.style.display = 'none';                    
+                })
+
                 dropdownContainer.appendChild(elemitem);
-            }
+            }            
         }
 
     }
