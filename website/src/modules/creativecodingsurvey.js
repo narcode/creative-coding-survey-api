@@ -301,9 +301,11 @@ export class CreativeCodingSurvey {
             responseEntity.responses.tools = []
         }
 
-        const name = responseEntity.responses.name;
-
-        this.types[entityType].push(name);
+        // Populate array for navigation with object desribing the entity
+        this.types[entityType].push({
+            id : responseEntity.id,
+            name : responseEntity.responses.name   
+        });
     
         // collecting keywords for block filter highlighter
         for (let keyword of responseEntity.responses.keywords) {
@@ -343,11 +345,12 @@ export class CreativeCodingSurvey {
             for (const item of arr) {
                 console.log("arr item:", item)
 
-                let aItem = document.createElement('a');
-                //divLink.classList.add('link');
-                // divLink.id = `link-${link}`;
-                aItem.innerHTML = `<a href='#'>${replaceUndefined(item)}</a>`;
-                dropdownContainer.appendChild(aItem);
+                let elemitem = document.createElement('span'); 
+                elemitem.classList.add('dropdown-entity');
+
+                elemitem.innerText = `${replaceUndefined(item.name)}`;
+                elemitem.setAttribute('entity-id', item.id)
+                dropdownContainer.appendChild(elemitem);
     
             }
             dropdownContainer.setAttribute('entities', arr);
