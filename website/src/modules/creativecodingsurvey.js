@@ -238,8 +238,8 @@ export class CreativeCodingSurvey {
         let header = document.getElementById("connection-card-header");
         let body = document.getElementById("connection-card-entities-space");
         header.innerHTML = `
-<span id='connection-card-header-value'>${value}</span>
-<span id='connection-card-header-field'>${topLabel}</span>
+<span id='connection-card-header-value' class='connection-card-header-${topLabel}'>${value}</span>
+<span id='connection-card-header-field'>entities</span>
 `;
 
         let bodyRectangle = body.getBoundingClientRect();
@@ -630,6 +630,13 @@ export class DOMEntity {
                 let details = this.showEntityDetails();
                 details.style.setProperty('--marginScale', `.5em`); // initialize values.
                 event.target.appendChild(details);
+                let detailsRect = details.getBoundingClientRect();
+                let parentRect = clickableEntity.parentElement.getBoundingClientRect();
+                let rightAdjustPx = Math.max(0, detailsRect.right - parentRect.right);
+                let bottomAdjustPx = Math.max(0, detailsRect.bottom - parentRect.bottom);
+                if (rightAdjustPx > 0 || bottomAdjustPx > 0) {
+                    details.style.transform = `translate(-${rightAdjustPx}px, -${bottomAdjustPx})`;
+                }
             }
         });
 
