@@ -615,10 +615,10 @@ export class DOMEntity {
                 event.target.appendChild(details);
                 let detailsRect = details.getBoundingClientRect();
                 let parentRect = clickableEntity.parentElement.getBoundingClientRect();
-                let rightAdjustPx = Math.max(0, detailsRect.right - parentRect.width);
-                let bottomAdjustPx = Math.max(0, detailsRect.bottom - parentRect.height);
+                let rightAdjustPx = Math.max(0, detailsRect.right - parentRect.right);
+                let bottomAdjustPx = Math.max(0, detailsRect.bottom - parentRect.bottom);
                 if (rightAdjustPx > 0 || bottomAdjustPx > 0) {
-                    details.style.transform = `translate(-${rightAdjustPx}px, -${bottomAdjustPx}px)`;
+                    details.style.transform = `translate(-${rightAdjustPx}px, -${bottomAdjustPx})`;
                 }
             }
         });
