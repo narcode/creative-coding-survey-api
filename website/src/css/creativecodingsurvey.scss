@@ -263,8 +263,8 @@ section {
 
   & > #countryOfResidence-filter-symbol::after{
     content: "\25EF";
-    font-weight: bold;
-    justify-content: center;
+    font-size: 1.12em;
+    
   }
 
   & > #countryOfResidence-filter-symbol.filter-active::after{
