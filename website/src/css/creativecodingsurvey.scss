@@ -188,6 +188,7 @@ section {
 
 #filter-keywords {
   border: 2px solid red;
+  padding-right: 5px;
 
   & > #keywords-filter-symbol{
     display: inline;
@@ -195,6 +196,7 @@ section {
 
   & > #keywords-filter-symbol::after{
     content: "&";
+    text-align: center;
   }
 
   & > #keywords-filter-symbol.filter-active::after{
@@ -210,7 +212,7 @@ section {
     text-decoration: 1px solid red underline;
   }
 
-  & > .filter-container > span:hover {
+  .filter-container > span:hover {
     color:red;
     cursor: pointer;
   }
@@ -220,6 +222,7 @@ section {
 
 #filter-tools{
   border: 2px solid green;
+  padding-right: 5px;
 
   & > #tools-filter-symbol{
     display: inline;
@@ -242,7 +245,7 @@ section {
     text-decoration: 1px solid green underline;
   }
 
-  & > .filter-container > span:hover {
+  .filter-container > span:hover {
     color:green;
     cursor: pointer;
   }
@@ -250,6 +253,7 @@ section {
 
 #filter-countryOfResidence{
   border: 2px solid gold;
+  padding-right: 5px;
 
   & > #countryOfResidence-filter-symbol{
     display: inline;
@@ -274,7 +278,7 @@ section {
     text-decoration: 1px solid gold underline;
   }
 
-  & > .filter-container > span:hover {
+  .filter-container > span:hover {
     color:gold;
     cursor: pointer;
   }
