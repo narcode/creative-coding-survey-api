@@ -40,7 +40,7 @@ nav {
   padding: 0;
   position: fixed;
   z-index: 1000;
-  
+
 
   ul {
     padding: 0.5% 0.5%;
@@ -108,7 +108,7 @@ section {
   z-index: 1;
   cursor: pointer;
 
-  background-color: white;  
+  background-color: white;
 
   &#link-feedback {
     padding: 5px 13px;
@@ -181,7 +181,7 @@ section {
 
 #filter-keywords {
   border: 2px solid red;
-  
+
   & > .filter-container > span {
     text-decoration: 1px solid red underline;
   }
@@ -309,12 +309,12 @@ section {
     // border: 1px solid black ;
     // box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     text-decoration: underline;
-  }  
-  
+  }
+
   .dropdown-content {
     display: none;
     background-color: white !important;
-  
+
     position: absolute;
     width: 200px;
     min-height: 0px;
@@ -336,32 +336,4 @@ section {
 
 .dropdown:hover .dropdown-content {
   // display: block;
-}
-
-#connection-card{
-  display: none;
-  position: relative;
-  right: 0%;
-  width: 45vw;
-  height: 100vh;
-  background-color: white;
-  border-left:1px solid black ;
-  z-index: 1000;
-
-  .card-header{
-    height: 8%;
-    width: 100%;
-    border-bottom: 1px solid black;
-  }
-
-  .card-entities-space{
-    height: 72%;
-  }
-
-  .card-tags-buttons{
-    height: 20%;
-    width: 100%;
-    border-top: 1px solid black;
-  }
-
 }
