@@ -335,10 +335,24 @@ export class CreativeCodingSurvey {
 
     updateTypeProperties() {
         for (const [type, arr] of Object.entries(this.types)) {
+            // Update counter
             const typeContainer = document.querySelector(`.menu li.${type} p`);
             typeContainer.setAttribute('count', arr.length);
-            typeContainer.setAttribute('entities', arr);
+
+            const dropdownContainer = document.querySelector(`.menu li.${type} span.dropdown-content`);
+            for (const item of arr) {
+                console.log("arr item:", item)
+
+                let aItem = document.createElement('a');
+                //divLink.classList.add('link');
+                // divLink.id = `link-${link}`;
+                aItem.innerHTML = `<a href='#'>${replaceUndefined(item)}</a>`;
+                dropdownContainer.appendChild(aItem);
+    
+            }
+            dropdownContainer.setAttribute('entities', arr);
         }
+
     }
 
     makeColophon() {
