@@ -304,7 +304,7 @@ export class CreativeCodingSurvey {
         const name = responseEntity.responses.name;
 
         this.types[entityType].push(name);
-    
+
         // collecting keywords for block filter highlighter
         for (let keyword of responseEntity.responses.keywords) {
             if (this.allFilters['keywords'].indexOf(keyword) === -1) {
@@ -613,6 +613,13 @@ export class DOMEntity {
                 let details = this.showEntityDetails();
                 details.style.setProperty('--marginScale', `.5em`); // initialize values.
                 event.target.appendChild(details);
+                let detailsRect = details.getBoundingClientRect();
+                let parentRect = clickableEntity.parentElement.getBoundingClientRect();
+                let rightAdjustPx = Math.max(0, detailsRect.right - parentRect.width);
+                let bottomAdjustPx = Math.max(0, detailsRect.bottom - parentRect.height);
+                if (rightAdjustPx > 0 || bottomAdjustPx > 0) {
+                    details.style.transform = `translate(-${rightAdjustPx}px, -${bottomAdjustPx}px)`;
+                }
             }
         });
 
