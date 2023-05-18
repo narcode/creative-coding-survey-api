@@ -374,12 +374,18 @@ section {
     }
 
     .entity-details {
+      max-width: auto;
       display: none;
+      position: fixed;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      flex-wrap: wrap;
       padding: 2px 0;
-    &:hover{
-      background-color: black;
-      color: white;
-    }  
+      &:hover{
+        background-color: black;
+        color: white;
+      }  
     }
   }
 }
