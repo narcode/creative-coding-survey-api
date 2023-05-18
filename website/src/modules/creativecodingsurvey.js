@@ -108,14 +108,14 @@ export class CreativeCodingSurvey {
                 symbol: "✓",
             }
         }
-        this.typeCount = {
-            enthusiast: 0,
-            maker: 0,
-            organisation: 0,
-            contributor: 0,
-            venue: 0,
-            event: 0,
-            anonymous: 0,
+        this.types = {
+            enthusiast: [],
+            maker: [],
+            organisation: [],
+            contributor: [],
+            venue: [],
+            event: [],
+            anonymous: [],
         };
         this.bluryCover = document.querySelector('.blury-cover');
         this.connectionCard = document.getElementById('connection-card');
@@ -204,8 +204,8 @@ export class CreativeCodingSurvey {
             this.processResponseEntity(responseEntity);
         });
 
-        // update all type totals in top nav
-        this.updateTypeTotals();
+        // update all type properties in top nav
+        this.updateTypeProperties();
 
         // set total number of entities in top nav
         const totalCountContainer = document.querySelector(`.menu li:first-of-type`);
@@ -243,16 +243,19 @@ export class CreativeCodingSurvey {
 `;
 
         let bodyRectangle = body.getBoundingClientRect();
-        console.log(bodyRectangle);
         const cellSize = 30;
-        this.connectionCardGrid = new Grid(
-            cellSize,
-            bodyRectangle.top + cellSize,
-            bodyRectangle.width - 2 * cellSize,
-            bodyRectangle.height - 2 * cellSize,
-            cellSize,
-            body,
-        );
+        if (this.connectionCardGrid == null) {
+            this.connectionCardGrid = new Grid(
+                cellSize,
+                bodyRectangle.top + cellSize,
+                bodyRectangle.width - 2 * cellSize,
+                bodyRectangle.height - 2 * cellSize,
+                cellSize,
+                body,
+            );
+        } else {
+            this.connectionCardGrid.clearEntities();
+        }
 
         this.surveyData.forEach(responseEntity => {
             let responses = responseEntity.responses;
@@ -298,7 +301,10 @@ export class CreativeCodingSurvey {
             responseEntity.responses.tools = []
         }
 
-        this.typeCount[entityType]++;
+        const name = responseEntity.responses.name;
+
+        this.types[entityType].push(name);
+    
         // collecting keywords for block filter highlighter
         for (let keyword of responseEntity.responses.keywords) {
             if (this.allFilters['keywords'].indexOf(keyword) === -1) {
@@ -327,10 +333,11 @@ export class CreativeCodingSurvey {
         this.mainGrid.addEntity(responseEntity);
     }
 
-    updateTypeTotals() {
-        for (const [type, count] of Object.entries(this.typeCount)) {
+    updateTypeProperties() {
+        for (const [type, arr] of Object.entries(this.types)) {
             const typeContainer = document.querySelector(`.menu li.${type} p`);
-            typeContainer.setAttribute('data-value', count);
+            typeContainer.setAttribute('count', arr.length);
+            typeContainer.setAttribute('entities', arr);
         }
     }
 
