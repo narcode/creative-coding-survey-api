@@ -216,10 +216,10 @@ export class CreativeCodingSurvey {
         const cellSize = 30;
         if (this.connectionCardGrid == null) {
             this.connectionCardGrid = new Grid(
-                cellSize,
-                bodyRectangle.top + cellSize,
-                bodyRectangle.width - 2 * cellSize,
-                bodyRectangle.height - 2 * cellSize,
+                0,
+                bodyRectangle.top,
+                bodyRectangle.width,
+                bodyRectangle.height,
                 cellSize,
                 body,
             );
@@ -354,7 +354,7 @@ export class CreativeCodingSurvey {
             divFilter.id = `filter-${t}`;
             divFilter.innerHTML = `<div id='${t}-filter-symbol'></div><div id='${t}-filter'></div>`;
             document.body.appendChild(divFilter);
-            
+
             divFilter.addEventListener('mouseover', (event) => {
                 if (!document.getElementById(`${t}-container`)) {
                     let optionsContainer = this.createFilterContainer(t);
@@ -382,7 +382,7 @@ export class CreativeCodingSurvey {
             filterelem.addEventListener('click', () => {
                 this.clearFilter(t);
             });
-        }        
+        }
     }
 
     createFilterContainer(filtertype) {
@@ -411,7 +411,7 @@ export class CreativeCodingSurvey {
             let shadowColorT = 'transparent';
             let shadowColorC = 'transparent';
 
-            // keywords            
+            // keywords
             let entityMatchesK = (keyword !== "" && (i.responses.keywords.find(e => e === keyword) !== undefined))
             if (entityMatchesK) {
                 shadowColorK = '#ff0000c7';
@@ -470,10 +470,11 @@ export class CreativeCodingSurvey {
 
 class Grid {
     constructor(leftOffset, topOffset, width, height, cellSize, containingElement) {
-        this.leftOffset = leftOffset;
-        this.topOffset = topOffset;
-        this.width = width;
-        this.height = height;
+        // We add some padding based on the cell size
+        this.leftOffset = leftOffset + cellSize;
+        this.topOffset = topOffset + cellSize;
+        this.width = width - 2 * cellSize;
+        this.height = height - 2 * cellSize;
         this.microCellRatio = 3;
         this.microCellSize = cellSize / this.microCellRatio;
         this.initialCellSize = cellSize;
