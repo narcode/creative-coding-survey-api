@@ -21,6 +21,17 @@ function makeWebsiteLink(s) {
     }
 }
 
+function responseIsOrContains(responses, fieldName, value) {
+    if (!(fieldName in responses)) {
+        return false;
+    }
+    let response = responses[fieldName];
+    if (response === value) {
+        return true;
+    }
+    return Array.isArray(response) && response.includes(value);
+}
+
 function randomInt(max) {
     return Math.floor(Math.random() * max);
 }
@@ -107,7 +118,7 @@ export class CreativeCodingSurvey {
             anonymous: 0,
         };
         this.bluryCover = document.querySelector('.blury-cover');
-        this.connectionCard = document.querySelector('#connection-card');
+        this.connectionCard = document.getElementById('connection-card');
 
         let root = document.documentElement;
         let viewport = window.visualViewport;
@@ -185,6 +196,7 @@ export class CreativeCodingSurvey {
             window.innerWidth,
             window.innerHeight - topOffset,
             cellSize,
+            document.body,
         );
 
         // this is where we're creating the dom entities
@@ -199,32 +211,56 @@ export class CreativeCodingSurvey {
         const totalCountContainer = document.querySelector(`.menu li:first-of-type`);
         totalCountContainer.setAttribute('data-value', this.surveyData.length);
 
-
-        this.bluryCover.addEventListener('click', () => {
-            this.connectionCard.style.display = "none";
-            this.bluryCover.style.display = "none";
-        })
+        this.bluryCover.addEventListener('click', (e) => this.deactivateConnectionCard(e));
 
         document.addEventListener('click', (event) => {
             let classList = event.target.classList;
             if (classList.contains('entity-details__countryOfResidence')) {
-                this.activateSideCard('Country', event.target.innerText);
+                this.activateConnectionCard('countryOfResidence', 'Country', event.target.innerText);
             } else if (classList.contains('entity-details__discipline')) {
-                this.activateSideCard('Discipline', event.target.innerText);
+                this.activateConnectionCard('disciplines', 'Discipline', event.target.innerText);
             } else if (classList.contains('entity-details__tool')) {
-                this.activateSideCard('Tool', event.target.innerText);
+                this.activateConnectionCard('tools', 'Tool', event.target.innerText);
             }
         });
     }
 
-    activateSideCard(topField, value) {
-        let header = document.getElementById("connection-card-header");
-        header.innerHTML = `
-<span id='connection-card-header-value'>${value}</span>
-<span id='connection-card-header-field'>${topField}</span>
-`;
+    deactivateConnectionCard() {
+        this.connectionCardGrid.clearEntities();
+        this.connectionCardGrid = null;
+        this.connectionCard.style.display = "none";
+        this.bluryCover.style.display = "none";
+    }
+
+    activateConnectionCard(fieldName, topLabel, value) {
         this.connectionCard.style.display = "initial";
         this.bluryCover.style.display = "initial";
+        let header = document.getElementById("connection-card-header");
+        let body = document.getElementById("connection-card-entities-space");
+        header.innerHTML = `
+<span id='connection-card-header-value'>${value}</span>
+<span id='connection-card-header-field'>${topLabel}</span>
+`;
+
+        let bodyRectangle = body.getBoundingClientRect();
+        console.log(bodyRectangle);
+        const cellSize = 30;
+        this.connectionCardGrid = new Grid(
+            0,
+            bodyRectangle.top,
+            bodyRectangle.width,
+            bodyRectangle.height,
+            cellSize,
+            body,
+        );
+
+        this.surveyData.forEach(responseEntity => {
+            let responses = responseEntity.responses;
+            if (!responseIsOrContains(responses, fieldName, value)) {
+                return;
+            }
+            this.connectionCardGrid.addEntity(responseEntity);
+        })
     }
 
     makeLinks() {
@@ -414,7 +450,7 @@ export class CreativeCodingSurvey {
 }
 
 class Grid {
-    constructor(leftOffset, topOffset, width, height, cellSize) {
+    constructor(leftOffset, topOffset, width, height, cellSize, containingElement) {
         this.leftOffset = leftOffset;
         this.topOffset = topOffset;
         this.width = width;
@@ -424,11 +460,12 @@ class Grid {
         this.initialCellSize = cellSize;
         this.occupied = {};
         this.domEntities = []
+        this.containingElement = containingElement;
     }
 
     addEntity(responseEntity) {
         let cell = this.randomCell();
-        let domEntity = new DOMEntity(responseEntity, this.translateFromCell(cell));
+        let domEntity = new DOMEntity(responseEntity, this.translateFromCell(cell), this.containingElement);
         this.addEntityToOccupied(cell, domEntity);
         this.domEntities.push(domEntity);
     }
@@ -449,15 +486,15 @@ class Grid {
 
     translateFromCell({x, y}) {
         return {
-            x: this.leftOffset + x * this.microCellSize,
-            y: this.topOffset + y * this.microCellSize,
+            x: this.leftOffset + x * this.microCellSize + this.microCellSize / 2,
+            y: this.topOffset + y * this.microCellSize + this.microCellSize / 2,
         };
     }
 
     translateToCell({x, y}, cellSize) {
         return {
-            x: Math.floor((x - this.leftOffset) / cellSize) * (cellSize / this.microCellSize),
-            y: Math.floor((y - this.topOffset) / cellSize) * (cellSize / this.microCellSize),
+            x: Math.floor((x - this.leftOffset - this.microCellSize / 2) / cellSize) * (cellSize / this.microCellSize),
+            y: Math.floor((y - this.topOffset - this.microCellSize / 2) / cellSize) * (cellSize / this.microCellSize),
         };
     }
 
@@ -533,11 +570,15 @@ class Grid {
         }
         this.occupied[cell.x][cell.y] = entity;
     }
+
+    clearEntities() {
+        this.domEntities.forEach((x) => x.remove());
+    }
 }
 
 // this creates a unique DOM entity from a surveyData row
 export class DOMEntity {
-    constructor(responseEntity, point) {
+    constructor(responseEntity, point, containingElement) {
         // console.log(responseEntity);
         const entityType = responseEntity.entityType;
 
@@ -557,7 +598,7 @@ export class DOMEntity {
         }
         clickableEntity.classList.add(`entity-container`, `icon`, `icon-${entityType}`);
 
-        document.body.appendChild(clickableEntity);
+        containingElement.appendChild(clickableEntity);
 
         // we're adding the entity details container once, on the first hover, after that css does the showing and the hiding
         clickableEntity.addEventListener('mouseover', (event) => {
@@ -640,6 +681,10 @@ export class DOMEntity {
 
     hasClass(class_) {
         return this.clickableEntity.classList.contains(class_);
+    }
+
+    remove() {
+        this.clickableEntity.remove();
     }
 }
 
