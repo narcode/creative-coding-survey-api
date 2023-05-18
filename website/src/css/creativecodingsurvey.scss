@@ -25,8 +25,10 @@ p {
 }
 
 a {
-  color: rgb(51,190,225);;
-  text-decoration: none;
+  //color: rgb(51,190,225);
+  color: black;
+  text-decoration: underline 2px black;
+
 
   &:hover {
     color: #ccc;
@@ -209,7 +211,7 @@ section {
   }
 
   & > .filter-container > span {
-    text-decoration: 1px solid red underline;
+    text-decoration: 2px solid red underline;
   }
 
   .filter-container > span:hover {
@@ -242,7 +244,7 @@ section {
   }
 
   & > .filter-container > span {
-    text-decoration: 1px solid green underline;
+    text-decoration: 2px solid green underline;
   }
 
   .filter-container > span:hover {
@@ -275,7 +277,7 @@ section {
   }
 
   & > .filter-container > span {
-    text-decoration: 1px solid gold underline;
+    text-decoration: 2px solid gold underline;
   }
 
   .filter-container > span:hover {
@@ -324,13 +326,16 @@ section {
       margin-bottom: var(--marginScale);
     }
     .entity-details__discipline {
-      color: red;
+      color: #86BCD8;
+      text-decoration: none;
     }
     .entity-details__tool {
       color: green;
+      text-decoration: none;
     }
     .entity-details__countryOfResidence {
       color: gold;
+      text-decoration: none;
     }
   }
 }
