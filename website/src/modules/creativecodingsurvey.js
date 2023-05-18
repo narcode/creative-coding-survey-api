@@ -208,19 +208,23 @@ export class CreativeCodingSurvey {
         document.addEventListener('click', (event) => {
             let classList = event.target.classList;
             if (classList.contains('entity-details__countryOfResidence')) {
-                this.activateSideCard('country', event.target.innerText);
+                this.activateSideCard('Country', event.target.innerText);
             } else if (classList.contains('entity-details__discipline')) {
-                this.activateSideCard('disciplines', event.target.innerText);
+                this.activateSideCard('Discipline', event.target.innerText);
             } else if (classList.contains('entity-details__tool')) {
-                this.activateSideCard('tools', event.target.innerText);
+                this.activateSideCard('Tool', event.target.innerText);
             }
         });
     }
 
     activateSideCard(topField, value) {
+        let header = document.getElementById("connection-card-header");
+        header.innerHTML = `
+<span id='connection-card-header-value'>${value}</span>
+<span id='connection-card-header-field'>${topField}</span>
+`;
         this.connectionCard.style.display = "initial";
         this.bluryCover.style.display = "initial";
-        console.log(topField, value);
     }
 
     makeLinks() {
