@@ -359,10 +359,15 @@ section {
       width: 100%;
       border-bottom: 1px solid black;
       text-decoration: none;
-    &:hover{
-      background-color: black;
-      color: white;
-    }  
+
+      &:hover{
+        background-color: black;
+        color: white;
+      }  
+    }
+
+    .entity-details {
+      display: none;
     }
   }
 }
