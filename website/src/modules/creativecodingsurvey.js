@@ -209,7 +209,7 @@ export class CreativeCodingSurvey {
 
         // set total number of entities in top nav
         const totalCountContainer = document.querySelector(`.menu li:first-of-type`);
-        totalCountContainer.setAttribute('data-value', this.surveyData.length);
+        totalCountContainer.setAttribute('count', this.surveyData.length);
 
         this.bluryCover.addEventListener('click', (e) => this.deactivateConnectionCard(e));
 
