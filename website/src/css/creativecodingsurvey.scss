@@ -102,7 +102,7 @@ section {
     background-color: #fff;
   }
   & a{
-    cursor: pointer;  
+    cursor: pointer;
     &:hover{
       text-decoration: underline;
     }
@@ -146,7 +146,7 @@ section {
   cursor: pointer;
   position: fixed;
   z-index: 1;
-  
+
 
   background-color: white;
 
@@ -344,7 +344,7 @@ section {
   background-color: white;
   border-left:1px solid black ;
   z-index: 1000;
-  
+
   .connection-card-header{
     display: flex;
     flex-direction: row;
@@ -370,15 +370,14 @@ section {
   }
 
   .connection-card-entities-space{
-    height: 72%;
+    height: 92%;
   }
 
-  .card-tags-buttons{
-    height: 20%;
-    width: 100%;
-    border-top: 1px solid black;
-  }
-
+  // .card-tags-buttons{
+  //   height: 20%;
+  //   width: 100%;
+  //   border-top: 1px solid black;
+  // }
 }
 
 .dropdown {
