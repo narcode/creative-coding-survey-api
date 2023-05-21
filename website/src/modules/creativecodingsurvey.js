@@ -506,8 +506,8 @@ class Grid {
         this.domEntities = [];
         this.containingElement = containingElement;
         this.obstacles = obstacles;
-        this.heightInCells = Math.floor(height / this.cellSize);
-        this.widthInCells = Math.floor(width / this.cellSize);
+        this.heightInCells = Math.floor(this.height / this.cellSize);
+        this.widthInCells = Math.floor(this.width / this.cellSize);
         this.nrCells = this.heightInCells * this.widthInCells;
         this.occupiedVector = {};
     }
