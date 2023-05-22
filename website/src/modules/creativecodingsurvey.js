@@ -321,23 +321,31 @@ export class CreativeCodingSurvey {
 
                 // we're adding the entity details container once, on the first hover, after that css does the showing and the hiding
                 elemitem.addEventListener('mouseover', (event) => {
+                    let entity = document.getElementById(item.id);
+                    console.log(entity)
                     let details = elemitem.querySelector('.entity-details');
-
+                    
                     if (!details) {
-                        const entity = document.getElementById(item.id);
+
                         details = entity.domEntity.showEntityDetails();
                         elemitem.appendChild(details);
-
                         let detailsRect = details.getBoundingClientRect();
                         let parentRect = document.body.getBoundingClientRect();
                         let rightAdjustPx = Math.max(0, detailsRect.right - parentRect.right);
-                        let bottomAdjustPx = Math.max(0, detailsRect.bottom - parentRect.bottom);
-                        if (rightAdjustPx > 0 || bottomAdjustPx > 0) {
-                            details.style.transform = `translate(-${rightAdjustPx}px, -${bottomAdjustPx}px)`;
+                        if (rightAdjustPx > 0) {
+                            details.style.transform = `translate(-${rightAdjustPx}px, 0px)`;
                         }        
+                    
                     }
 
+                    let parentSpan = elemitem.getBoundingClientRect();
+                    let topAdjustPx = parentSpan.top;
+                    let leftAdjustPx = parentSpan.right;
+
+                    details.style.top = `${topAdjustPx}px`;
+                    details.style.left = `${leftAdjustPx}px`;
                     details.style.display = 'flex';
+
                 });
 
                 elemitem.addEventListener('mouseout', (event) => {

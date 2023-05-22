@@ -400,6 +400,7 @@ section {
   display: inline-block;
   padding: 0.5% 10px;
   padding-left: 20px;
+  width: fit-content;
   cursor: pointer;
 
   p:hover {
@@ -414,8 +415,8 @@ section {
     background-color: white !important;
     left: -2px;
     position: absolute;
-    width: 100%;
     max-height: 40vh;
+    width: auto;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     border: 1px solid black;
     padding: 0;
@@ -434,8 +435,10 @@ section {
 
     span {
       display: block;
+      position: relative;
       font-size: 0.85em;
       width: 100%;
+      height: auto;
       border-bottom: 1px solid black;
       text-decoration: none;
 
@@ -446,19 +449,23 @@ section {
     }
 
     .entity-details {
+      min-width: 300px;
       max-width: 300px;
-      position: absolute;
+      position: fixed;
+      display: inline;
+      height: fit-content;
+      padding: 0.8em;
       flex-direction: column;
       justify-content: flex-start;
       align-items: flex-start;
       flex-wrap: wrap;
-      margin-left: 100px;
-      margin-top: 0;
+      margin: 0;
       text-align: left;
+      overflow-x: hidden;
 
       .details{
         color:black;
-        padding-left: 5%;
+        padding: 0.3em;
       
       .details > a{
         color: black;
