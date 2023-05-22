@@ -1,4 +1,5 @@
 import { loadJSON } from '../utils/ajax.js';
+import { randomInt, randomAngle, randomRange, randomInGrid } from '../utils/random.js';
 import { mockData } from '../data/surveyData.js';
 
 import '../css/creativecodingsurvey.scss';
@@ -32,18 +33,6 @@ function responseIsOrContains(responses, fieldName, value) {
     return Array.isArray(response) && response.includes(value);
 }
 
-function randomInt(max) {
-    return Math.floor(Math.random() * max);
-}
-
-function randomAngle() {
-    return Math.random() * Math.PI * 2;
-}
-
-function randomInRange(low, high) {
-    return Math.random() * (high - low) + low;
-}
-
 function elipseRadiusAtAngle(angle, xRadius, yRadius) {
     return (yRadius * xRadius) / Math.sqrt(yRadius ** 2 * Math.sin(angle) ** 2 + xRadius ** 2 * Math.cos(angle) ** 2);
 }
@@ -63,27 +52,14 @@ function distance(a, b) {
     return Math.hypot(b.x - a.x, b.y - a.y);
 }
 
-const extraRadius = 130;
-const clearanceRadius = 30;
-
-function computeMovePositionInOrbit(center, xRadius, yRadius) {
-    const angle = randomAngle();
-    const extraDist = randomInRange(clearanceRadius, extraRadius);
-    const angleRadius = elipseRadiusAtAngle(angle, xRadius, yRadius);
-    return polarToCartesian(angle, angleRadius + extraDist, center);
+function insideRect({x, y}, topLeft, width, height) {
+    return x >= topLeft.x && y >= topLeft.y && x <= topLeft.x + width && y <= topLeft.y + height;
 }
 
-function computeMovePositionOutOfOrbit(center, xRadius, yRadius, current) {
-    const angle = elipseAngleAtPoint(center, current);
-    const angleRadius = elipseRadiusAtAngle(angle, xRadius, yRadius);
-    const totalRadius = angleRadius + extraRadius + clearanceRadius;
-    const dist = distance(center, current);
-    if (totalRadius >= dist) {
-        const extraDist = (totalRadius - dist) * (Math.random(5) + 1.5);
-        return polarToCartesian(angle, totalRadius + extraDist, center);
-    } else {
-        return null;
-    }
+function collidesWithObstacles(point, obstacles) {
+    return obstacles.some(rect =>
+        insideRect(point, {x: rect.offsetLeft - 5, y: rect.offsetTop - 5}, rect.offsetWidth + 10, rect.offsetHeight + 10)
+    );
 }
 
 export class CreativeCodingSurvey {
@@ -158,8 +134,8 @@ export class CreativeCodingSurvey {
 
         this.makeColophon();
 
-        const topOffset = 100;
-        const cellSize = 30;
+        const topOffset = 60;
+        const cellSize = 18;
         this.mainGrid = new Grid(
             0,
             topOffset,
@@ -167,12 +143,26 @@ export class CreativeCodingSurvey {
             window.innerHeight - topOffset,
             cellSize,
             document.body,
+            [
+                document.getElementById("design").labels[0],
+                document.getElementById("art").labels[0],
+                document.getElementById("research").labels[0],
+                document.getElementById("education").labels[0],
+                document.getElementById("music").labels[0],
+                document.getElementById("performance").labels[0],
+                document.getElementById("science").labels[0],
+                document.getElementById("livecoding").labels[0],
+                document.getElementById("digitalculture").labels[0],
+            ]
         );
+        window.mainGrid = this.mainGrid;
 
         // this is where we're creating the dom entities
         this.surveyData.map((responseEntity) => {
             this.processResponseEntity(responseEntity);
         });
+
+        this.mainGrid.populate(this.surveyData);
 
         // update all type properties in top nav
         this.updateTypeProperties();
@@ -222,18 +212,18 @@ export class CreativeCodingSurvey {
                 bodyRectangle.height,
                 cellSize,
                 body,
+                [],
             );
         } else {
             this.connectionCardGrid.clearEntities();
         }
 
-        this.surveyData.forEach(responseEntity => {
-            let responses = responseEntity.responses;
-            if (!responseIsOrContains(responses, fieldName, value)) {
-                return;
-            }
-            this.connectionCardGrid.addEntity(responseEntity);
-        })
+        let relevantEntities =
+            this.surveyData.filter(responseEntity => {
+                let responses = responseEntity.responses;
+                return responseIsOrContains(responses, fieldName, value);
+            });
+        this.connectionCardGrid.populate(relevantEntities);
     }
 
     makeLinks() {
@@ -254,7 +244,6 @@ export class CreativeCodingSurvey {
                 const url = props.url;
                 const target = props.target;
 
-                console.log("Clicked on link: ", url)
                 window.open(url, target);
             });
         }
@@ -274,9 +263,9 @@ export class CreativeCodingSurvey {
         // Populate array for navigation with object desribing the entity
         this.types[entityType].push({
             id : responseEntity.id,
-            name : responseEntity.responses.name   
+            name : responseEntity.responses.name
         });
-    
+
         // collecting keywords for block filter highlighter
         for (let keyword of responseEntity.responses.keywords) {
             if (this.allFilters['keywords'].indexOf(keyword) === -1) {
@@ -301,8 +290,6 @@ export class CreativeCodingSurvey {
                 this.allDisciplines.push(entityDiscipline)
             }
         }
-
-        this.mainGrid.addEntity(responseEntity);
     }
 
     updateTypeProperties() {
@@ -313,7 +300,7 @@ export class CreativeCodingSurvey {
 
             const dropdownContainer = document.querySelector(`.menu li.${type} span.dropdown-content`);
             for (const item of arr) {
-                let elemitem = document.createElement('span');                 
+                let elemitem = document.createElement('span');
                 elemitem.classList.add('dropdown-entity');
 
                 elemitem.innerText = `${replaceUndefined(item.name)}`;
@@ -350,11 +337,11 @@ export class CreativeCodingSurvey {
 
                 elemitem.addEventListener('mouseout', (event) => {
                     let details = elemitem.querySelector('.entity-details');
-                    details.style.display = 'none';                    
+                    details.style.display = 'none';
                 })
 
                 dropdownContainer.appendChild(elemitem);
-            }            
+            }
         }
 
     }
@@ -517,137 +504,158 @@ export class CreativeCodingSurvey {
 }
 
 class Grid {
-    constructor(leftOffset, topOffset, width, height, cellSize, containingElement) {
+    constructor(leftOffset, topOffset, width, height, cellSize, containingElement, obstacles) {
         // We add some padding based on the cell size
         this.leftOffset = leftOffset + cellSize;
         this.topOffset = topOffset + cellSize;
         this.width = width - 2 * cellSize;
         this.height = height - 2 * cellSize;
-        this.microCellRatio = 3;
-        this.microCellSize = cellSize / this.microCellRatio;
-        this.initialCellSize = cellSize;
-        this.occupied = {};
-        this.domEntities = []
+        this.cellSize = cellSize;
+        this.domEntities = [];
         this.containingElement = containingElement;
+        this.obstacles = obstacles;
+        this.heightInCells = Math.floor(this.height / this.cellSize);
+        this.widthInCells = Math.floor(this.width / this.cellSize);
+        this.nrCells = this.heightInCells * this.widthInCells;
+        this.occupiedVector = {};
     }
 
-    addEntity(responseEntity) {
-        let cell = this.randomCell();
-        let domEntity = new DOMEntity(responseEntity, this.translateFromCell(cell), this.containingElement);
-        this.addEntityToOccupied(cell, domEntity);
+    populate(responseEntities) {
+        let randomGen = randomRange(0, this.nrCells, 1);
+        responseEntities.forEach(e => {
+            let index = randomGen.next().value;
+            while (this.isOccupied(index)) {
+                index = randomGen.next().value;
+            }
+            this.addEntity(index, e);
+        });
+    }
+
+    addEntity(index, responseEntity) {
+        let domEntity = new DOMEntity(responseEntity, this.translateFromIndex(index), this.containingElement);
+        this.addEntityToOccupied(index, domEntity);
         this.domEntities.push(domEntity);
     }
 
-    randomCell() {
-        let y = randomInt(this.height / this.initialCellSize) * this.microCellRatio;
-        let x = randomInt(this.width / this.initialCellSize) * this.microCellRatio;
-        while (this.isOccupied(x, y)) {
-            y = randomInt(this.height / this.microCellSize);
-            x = randomInt(this.width / this.microCellSize);
-        }
-        return {x, y};
+    isOccupied(index) {
+        return index in this.occupiedVector || collidesWithObstacles(this.translateFromIndex(index), this.obstacles);
     }
 
-    isOccupied(x, y) {
-        return x in this.occupied && y in this.occupied[x];
-    }
-
-    translateFromCell({x, y}) {
+    indexToCell(i) {
         return {
-            x: this.leftOffset + x * this.microCellSize + this.microCellSize / 2,
-            y: this.topOffset + y * this.microCellSize + this.microCellSize / 2,
+            x: Math.floor(i % this.widthInCells),
+            y: Math.floor(i / this.widthInCells),
         };
     }
 
-    translateToCell({x, y}, cellSize) {
+    cellToIndex({x, y}) {
+        return y * this.widthInCells + x;
+    }
+
+    pointToCell({x, y}) {
         return {
-            x: Math.floor((x - this.leftOffset - this.microCellSize / 2) / cellSize) * (cellSize / this.microCellSize),
-            y: Math.floor((y - this.topOffset - this.microCellSize / 2) / cellSize) * (cellSize / this.microCellSize),
+            x: Math.floor((x - this.leftOffset - this.cellSize / 2) / this.cellSize),
+            y: Math.floor((y - this.topOffset - this.cellSize / 2) / this.cellSize),
         };
+    }
+
+    translateFromIndex(i) {
+        let cell = this.indexToCell(i);
+        return  {
+            x: this.leftOffset + cell.x * this.cellSize + this.cellSize / 2,
+            y: this.topOffset + cell.y * this.cellSize + this.cellSize / 2,
+        };
+    }
+
+    translateToIndex(point) {
+        return this.cellToIndex(this.pointToCell(point));
     }
 
     moveEntitiesForDiscipline(disciplineCheckbox) {
         const id = disciplineCheckbox.id;
         if (disciplineCheckbox.checked) {
             const label = disciplineCheckbox.labels[0];
-            const xRadius = label.offsetWidth / 2;
-            const yRadius = label.offsetHeight / 2;
-            const center = { x: label.offsetLeft + xRadius, y: label.offsetTop + yRadius };
-            this.domEntities.forEach((entity) => this.moveEntityForSelectedDiscipline(entity, id, center, xRadius, yRadius));
+            const extraDist = 10;
+            const halfDist = extraDist / 2;
+            const topLeft = this.pointToCell({
+                x: label.offsetLeft,
+                y: label.offsetTop,
+            });
+            topLeft.x -= halfDist;
+            topLeft.y -= halfDist;
+            const width = Math.floor(label.offsetWidth / this.cellSize + extraDist);
+            const height = Math.floor(label.offsetHeight / this.cellSize + extraDist);
+            this.domEntities.sort((a, b) => {
+                return a.hasClass(id) ? 1 : -1;
+            })
+            let i = 0;
+            let gen = randomRange(0, this.nrCells, 1);
+            for (; i < this.domEntities.length; ++i) {
+                let e = this.domEntities[i];
+                if (e.hasClass(id)) {
+                    break;
+                }
+                if (!insideRect(this.pointToCell(e.position()), topLeft, width, height)) {
+                    continue;
+                }
+                let index = gen.next().value;
+                while (index != null && (this.isOccupied(index) || insideRect(this.indexToCell(index), topLeft, width, height))) {
+                    index = gen.next().value;
+                }
+                if (index == null) {
+                    break;
+                }
+                this.removeEntityFromOccupied(e);
+                this.addEntityToOccupied(index, e);
+                e.unselectedMoveTo(id, this.translateFromIndex(index));
+            }
+            gen = randomInGrid(topLeft, width, height);
+            let count = 0;
+            for (; i < this.domEntities.length; ++i) {
+                let e = this.domEntities[i];
+                this.removeEntityFromOccupied(e);
+                let index = this.cellToIndex(gen.next().value);
+                while (index != null && this.isOccupied(index)) {
+                    index = this.cellToIndex(gen.next().value);
+                    count += 1;
+                }
+                if (index == null) {
+                    break;
+                }
+                this.addEntityToOccupied(index, e);
+                e.selectedMoveTo(id, this.translateFromIndex(index));
+            }
         } else {
             this.domEntities.forEach((entity) => this.moveEntityForUnselectedDiscipline(entity, id));
-        }
-    }
-
-    randomCellInOrbit(center, xRadius, yRadius) {
-        let point = computeMovePositionInOrbit(center, xRadius, yRadius);
-        let cell = this.translateToCell(point, this.initialCellSize);
-        while (this.isOccupied(cell.x, cell.y)) {
-            point = computeMovePositionInOrbit(center, xRadius, yRadius);
-            cell  = this.translateToCell(point, this.microCellSize);
-        }
-        return cell;
-    }
-
-    randomCellOutOfOrbit(center, xRadius, yRadius, originalPosition) {
-        let point = computeMovePositionOutOfOrbit(center, xRadius, yRadius, originalPosition);
-        if (point == null) {
-            return null;
-        }
-        let cell = this.translateToCell(point, this.initialCellSize);
-        while (this.isOccupied(cell.x, cell.y)) {
-            point = computeMovePositionOutOfOrbit(center, xRadius, yRadius, originalPosition);
-            if (point == null) {
-                return null;
-            }
-            cell = this.translateToCell(point, this.microCellSize);
-        }
-        return cell;
-    }
-
-    moveEntityForSelectedDiscipline(entity, disciplineId, center, xRadius, yRadius) {
-        if (entity.hasClass(disciplineId)) {
-            this.removeEntityFromOccupied(entity);
-            let cell = this.randomCellInOrbit(center, xRadius, yRadius);
-            this.addEntityToOccupied(cell, entity);
-            entity.selectedMoveTo(disciplineId, this.translateFromCell(cell));
-        } else {
-            const cell = this.randomCellOutOfOrbit(center, xRadius, yRadius, entity.originalPosition());
-            if (cell != null) {
-                this.removeEntityFromOccupied(entity);
-                this.addEntityToOccupied(cell, entity);
-                entity.unselectedMoveTo(disciplineId, this.translateFromCell(cell));
-            }
         }
     }
 
     moveEntityForUnselectedDiscipline(entity, disciplineId) {
         this.removeEntityFromOccupied(entity);
         entity.resetPosition(disciplineId);
+        let index = this.translateToIndex(entity.position());
+        this.addEntityToOccupied(index, entity);
     }
 
     removeEntityFromOccupied(entity) {
-        let pos = entity.position();
-        let cell = this.translateToCell(pos, this.microCellSize);
-        delete this.occupied[cell.x][cell.y];
+        let index = this.translateToIndex(entity.position());
+        delete this.occupiedVector[index];
     }
 
-    addEntityToOccupied(cell, entity) {
-        if (!(cell.x in this.occupied)) {
-            this.occupied[cell.x] = {};
-        }
-        this.occupied[cell.x][cell.y] = entity;
+    addEntityToOccupied(index, entity) {
+        this.occupiedVector[index] = entity;
     }
 
     clearEntities() {
         this.domEntities.forEach((x) => x.remove());
+        this.occupiedVector = {};
+        this.domEntities = [];
     }
 }
 
 // this creates a unique DOM entity from a surveyData row
 export class DOMEntity {
     constructor(responseEntity, point, containingElement) {
-        // console.log(responseEntity);
         const entityType = responseEntity.entityType;
 
         let clickableEntity = document.createElement('div');
@@ -781,7 +789,6 @@ export default element => {
         responseData = mockData;
         startInstance(responseData);
     });
-
     const startInstance = (responseData) => {
         new CreativeCodingSurvey(element, responseData);
     }
