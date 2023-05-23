@@ -610,14 +610,12 @@ class Grid {
                 e.unselectedMoveTo(id, this.translateFromIndex(index));
             }
             gen = randomInGrid(topLeft, width, height);
-            let count = 0;
             for (; i < this.domEntities.length; ++i) {
                 let e = this.domEntities[i];
                 this.removeEntityFromOccupied(e);
                 let index = this.cellToIndex(gen.next().value);
                 while (index != null && this.isOccupied(index)) {
                     index = this.cellToIndex(gen.next().value);
-                    count += 1;
                 }
                 if (index == null) {
                     break;
